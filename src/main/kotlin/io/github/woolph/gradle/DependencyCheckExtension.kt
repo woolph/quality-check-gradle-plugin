@@ -1,0 +1,91 @@
+package io.github.woolph.gradle
+
+import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.plugins.ExtensionAware
+import org.gradle.api.provider.Property
+import org.gradle.kotlin.dsl.*
+import javax.inject.Inject
+
+abstract class DependencyCheckExtension @Inject constructor(project: Project): Skipable {
+    override val skip: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .convention(false)
+
+    val cvssThreshold: Property<Double> = project.objects.property(Double::class.java)
+        .convention(0.0)
+
+    val suppressionFile: RegularFileProperty = project.objects.fileProperty()
+        .convention(project.layout.projectDirectory.file("dependency-check-suppression.xml"))
+
+    companion object {
+        fun Project.applyDependencyCheckExtension(baseExtension: ExtensionAware) {
+            val dependencyCheckExtension = baseExtension.extensions.create("dependencyCheck", DependencyCheckExtension::class, project)
+
+            try {
+                val check = tasks.named("check")
+
+                plugins.apply("org.owasp.dependencycheck")
+
+                val dependencyCheckAnalyze = tasks.named<org.owasp.dependencycheck.gradle.tasks.Analyze>("dependencyCheckAnalyze")
+
+                check {
+                    dependsOn(dependencyCheckAnalyze)
+                }
+
+                afterEvaluate {
+                    if (dependencyCheckExtension.skip.get()) {
+                        logger.warn("dependencyCheck is disabled!")
+                    }
+
+                    extensions.getByName<org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension>("dependencyCheck").apply {
+                        skip = dependencyCheckExtension.skip.get()
+                        failBuildOnCVSS = dependencyCheckExtension.cvssThreshold.get().toFloat()
+                        formats = listOf(
+                            org.owasp.dependencycheck.reporting.ReportGenerator.Format.HTML,
+                            org.owasp.dependencycheck.reporting.ReportGenerator.Format.JUNIT,
+                        )
+                        if (dependencyCheckExtension.suppressionFile.get().asFile.exists()) {
+                            logger.warn("dependencyCheck suppression file ${dependencyCheckExtension.suppressionFile.get()} is being applied")
+                            suppressionFile = dependencyCheckExtension.suppressionFile.get().asFile.toString()
+                        }
+
+                        scanConfigurations = configurations.filter {
+                            !it.name.startsWith("test") &&
+                                    it.name.contains("DependenciesMetadata") && (
+                                    it.name.startsWith("api") ||
+                                            it.name.startsWith("implementation") ||
+                                            it.name.startsWith("runtimeOnly") ||
+                                            it.name.contains("Api") ||
+                                            it.name.contains("Implementation") ||
+                                            it.name.contains("RuntimeOnly")
+                                    )
+                        }.map {
+                            it.name
+                        }
+
+                        if (project.hasProperty("DEPENDENCY_CHECK_DB_CONNECTION")) {
+                            logger.warn("dependencyCheck uses ${project.properties["DEPENDENCY_CHECK_DB_CONNECTION"]} instead of default in-mem-db (=> autoUpdate is deactivated!)")
+                            autoUpdate = false
+
+                            data(delegateClosureOf<groovy.lang.GroovyObject> {
+                                setProperty("driver", project.properties["DEPENDENCY_CHECK_DB_DRIVER"])
+                                setProperty("connectionString", project.properties["DEPENDENCY_CHECK_DB_CONNECTION"])
+                                if (project.hasProperty("DEPENDENCY_CHECK_DB_USER")) {
+                                    setProperty("username", project.properties["DEPENDENCY_CHECK_DB_USER"])
+                                }
+                                if (project.hasProperty("DEPENDENCY_CHECK_DB_PASSWORD")) {
+                                    setProperty("password", project.properties["DEPENDENCY_CHECK_DB_PASSWORD"])
+                                }
+                            })
+                        } else {
+                            logger.warn("dependencyCheck using default settings for data")
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                println(e)
+                logger.error("dependencyCheck will not be applied due to exception", e)
+            }
+        }
+    }
+}

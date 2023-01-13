@@ -1,0 +1,12 @@
+[libraries]
+dependencyCheck = "org.owasp:dependency-check-gradle:7.4.4"
+sonarQube = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:3.5.0.2730"
+
+databaseDrivers-postgres = "org.postgresql:postgresql:42.4.0"
+databaseDrivers-mssql = "com.microsoft.sqlserver:mssql-jdbc:10.2.1.jre8"
+
+test-junit = "org.junit.jupiter:junit-jupiter:5.9.2"
+
+
+[plugins]
+pluginPublish = "com.gradle.plugin-publish:1.0.0-rc-1"
