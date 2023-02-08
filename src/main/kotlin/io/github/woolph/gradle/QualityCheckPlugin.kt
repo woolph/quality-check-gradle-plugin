@@ -2,6 +2,7 @@ package io.github.woolph.gradle
 
 import io.github.woolph.gradle.DependencyCheckExtension.Companion.applyDependencyCheckExtension
 import io.github.woolph.gradle.SonarqubeExtension.Companion.applySonarQubeExtension
+import io.github.woolph.gradle.licensecheck.LicenseCheckExtension.Companion.applyLicenseCheckExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
@@ -19,5 +20,6 @@ class QualityCheckPlugin: Plugin<Project> {
 
         applyDependencyCheckExtension(qualityCheckExtension as ExtensionAware)
         applySonarQubeExtension(qualityCheckExtension as ExtensionAware)
+        applyLicenseCheckExtension(qualityCheckExtension as ExtensionAware)
     }
 }

@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.github.woolph.quality-check"
-version = "1.0.0"
+version = "1.1.0"
 
 pluginBundle {
     website = "https://github.com/woolph/quality-check-gradle-plugin"
@@ -20,7 +20,7 @@ gradlePlugin {
             id = "io.github.woolph.quality-check"
             implementationClass = "io.github.woolph.gradle.QualityCheckPlugin"
             displayName = "ENGEL Quality Check"
-            description = "Adds dependency check and sonarqube to your build."
+            description = "Adds dependency check, license check, and sonarqube to your build."
         }
     }
 }
@@ -33,6 +33,7 @@ repositories {
 dependencies {
     implementation(libs.dependencyCheck)
     implementation(libs.sonarQube)
+    implementation(libs.licenseReport)
 
     runtimeOnly(libs.databaseDrivers.postgres)
     runtimeOnly(libs.databaseDrivers.mssql)
