@@ -11,9 +11,19 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project): S
     override val skip: Property<Boolean> = project.objects.property(Boolean::class.java)
         .convention(false)
 
+    /**
+     * defines the threshold for the CVS score. Dependencies with a vulnerability with a CVS score greater or equal to
+     * the cvssThreshold will cause the build to fail. The maximum value for CVS scores is 10.0, therefore a
+     * cvssThreshold of greater than 10.0 effectively allows al vulnerabilities to pass the check.
+     * Defaults to 0.0
+     */
     val cvssThreshold: Property<Double> = project.objects.property(Double::class.java)
         .convention(0.0)
 
+    /**
+     * location of the dependencyCheck suppression file.
+     * Defaults to "$projectDir/dependency-check-suppression.xml"
+     */
     val suppressionFile: RegularFileProperty = project.objects.fileProperty()
         .convention(project.layout.projectDirectory.file("dependency-check-suppression.xml"))
 

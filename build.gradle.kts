@@ -45,16 +45,10 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.toVersion(libs.versions.jvmTarget.get())
 
     withSourcesJar()
     withJavadocJar()
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
 }
 
 tasks.withType<Test> {

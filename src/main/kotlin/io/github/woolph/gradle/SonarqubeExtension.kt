@@ -7,10 +7,11 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.property
 import javax.inject.Inject
 
 abstract class SonarqubeExtension @Inject constructor(project: Project): Skipable {
-    override val skip: Property<Boolean> = project.objects.property(Boolean::class.java)
+    override val skip: Property<Boolean> = project.objects.property<Boolean>()
         .convention(false)
 
     /**
@@ -22,7 +23,7 @@ abstract class SonarqubeExtension @Inject constructor(project: Project): Skipabl
      * -Psonarqube.edition={edition}.
      * It is set to UNKNOWN by default.
      */
-    val edition: Property<SonarQubeEdition> = project.objects.property(SonarQubeEdition::class.java)
+    val edition: Property<SonarQubeEdition> = project.objects.property<SonarQubeEdition>()
         .convention(SonarQubeEdition.of(project.properties["sonarqube.edition"].toString()) ?: SonarQubeEdition.UNKNOWN)
 
     companion object {
