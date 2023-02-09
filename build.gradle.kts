@@ -3,6 +3,8 @@ plugins {
     `kotlin-dsl`
     `maven-publish`
     alias(libs.plugins.pluginPublish)
+
+    alias(libs.plugins.spotless)
 }
 
 group = "io.github.woolph.quality-check"
@@ -45,7 +47,7 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion(libs.versions.jvmTarget.get())
+    sourceCompatibility = libs.versions.jvmTarget.map { JavaVersion.toVersion(it) }.get()
 
     withSourcesJar()
     withJavadocJar()
@@ -53,4 +55,14 @@ java {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+spotless {
+    kotlin {
+        ktlint(libs.versions.ktlint.get())
+        licenseHeader("/* Copyright \$YEAR ENGEL Austria GmbH */")
+    }
+    kotlinGradle {
+        ktlint(libs.versions.ktlint.get())
+    }
 }

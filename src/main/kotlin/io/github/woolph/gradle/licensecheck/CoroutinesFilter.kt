@@ -1,3 +1,4 @@
+/* Copyright 2023 ENGEL Austria GmbH */
 package io.github.woolph.gradle.licensecheck
 
 import com.github.jk1.license.ConfigurationData
@@ -14,7 +15,7 @@ import com.github.jk1.license.filter.DependencyFilter
  * this filter checks for the module org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4
  * cause for some reason it does not provide a license (it ought to be Apache License, Version 2.0)
  */
-internal class CoroutinesFilter: DependencyFilter {
+internal class CoroutinesFilter : DependencyFilter {
     override fun filter(source: ProjectData) =
         ProjectData(
             source.project,
@@ -66,7 +67,8 @@ internal class CoroutinesFilter: DependencyFilter {
                             )
                         else
                             moduleData
-                    })
+                    }
+                )
             }.toList(),
         )
 }

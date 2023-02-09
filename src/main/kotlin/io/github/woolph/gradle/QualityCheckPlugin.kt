@@ -1,3 +1,4 @@
+/* Copyright 2023 ENGEL Austria GmbH */
 package io.github.woolph.gradle
 
 import io.github.woolph.gradle.DependencyCheckExtension.Companion.applyDependencyCheckExtension
@@ -6,11 +7,10 @@ import io.github.woolph.gradle.licensecheck.LicenseCheckExtension.Companion.appl
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
-
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.create
 
 @Suppress("unused")
-class QualityCheckPlugin: Plugin<Project> {
+class QualityCheckPlugin : Plugin<Project> {
     private lateinit var qualityCheckExtension: QualityCheckExtension
     private lateinit var dependencyCheckExtension: DependencyCheckExtension
     private lateinit var sonarqubeExtension: SonarqubeExtension

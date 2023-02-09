@@ -1,5 +1,6 @@
 [versions]
 jvmTarget = "1.8"
+ktlint = "0.45.2"
 
 [libraries]
 dependencyCheck = "org.owasp:dependency-check-gradle:7.4.4"
@@ -13,3 +14,4 @@ test-junit = "org.junit.jupiter:junit-jupiter:5.9.2"
 
 [plugins]
 pluginPublish = "com.gradle.plugin-publish:1.0.0-rc-1"
+spotless = "com.diffplug.spotless:6.12.0"

@@ -1,3 +1,4 @@
+/* Copyright 2023 ENGEL Austria GmbH */
 package io.github.woolph.gradle
 
 import org.gradle.api.Project
@@ -10,7 +11,7 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.property
 import javax.inject.Inject
 
-abstract class SonarqubeExtension @Inject constructor(project: Project): Skipable {
+abstract class SonarqubeExtension @Inject constructor(project: Project) : Skipable {
     override val skip: Property<Boolean> = project.objects.property<Boolean>()
         .convention(false)
 
@@ -28,7 +29,7 @@ abstract class SonarqubeExtension @Inject constructor(project: Project): Skipabl
 
     companion object {
         fun Project.applySonarQubeExtension(baseExtension: ExtensionAware) {
-            val sonarqubeExtension = baseExtension.extensions.create("sonarQube", SonarqubeExtension::class, project)
+            val thisExtension = baseExtension.extensions.create("sonarQube", SonarqubeExtension::class, project)
 
             try {
                 val check = tasks.named("check")
@@ -40,7 +41,11 @@ abstract class SonarqubeExtension @Inject constructor(project: Project): Skipabl
 
                 plugins.apply("org.sonarqube")
 
-                val sonarqube = tasks.named<org.sonarqube.gradle.SonarTask>("sonar")
+                val sonarqube = tasks.named<org.sonarqube.gradle.SonarTask>("sonar") {
+                    onlyIf {
+                        thisExtension.skip.map { !it }.get()
+                    }
+                }
 
                 jacocoTestReport {
                     dependsOn(test)
@@ -61,15 +66,15 @@ abstract class SonarqubeExtension @Inject constructor(project: Project): Skipabl
                 }
 
                 afterEvaluate {
-                    if (sonarqubeExtension.skip.get()) {
+                    if (thisExtension.skip.get()) {
                         logger.warn("sonarqube is disabled!")
-                    } else if (sonarqubeExtension.edition.get() == SonarQubeEdition.COMMUNITY && System.getenv("BUILD_REASON") == "PullRequest") {
+                    } else if (thisExtension.edition.get() == SonarQubeEdition.COMMUNITY && System.getenv("BUILD_REASON") == "PullRequest") {
                         logger.warn("sonarqube is running on Community Edition and build reason is PullRequest => skipping sonarqube!")
-                        sonarqubeExtension.skip.set(true)
+                        thisExtension.skip.set(true)
                     }
 
                     extensions.getByName<org.sonarqube.gradle.SonarExtension>("sonar").apply {
-                        isSkipProject = sonarqubeExtension.skip.get()
+                        isSkipProject = thisExtension.skip.get()
 
                         properties {
                             property("sonar.projectKey", project.name)

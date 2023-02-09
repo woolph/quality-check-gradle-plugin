@@ -1,3 +1,4 @@
+/* Copyright 2023 ENGEL Austria GmbH */
 package io.github.woolph.gradle.licensecheck
 
 import com.github.jk1.license.filter.DependencyFilter
@@ -43,7 +44,8 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
      * "PUBLIC DOMAIN")
      */
     // FIXME check whether GPL with CE, EPL-1.0, CC0, & all are really okay
-    val allowedLicenses = project.objects.setProperty<String>().convention(setOf(
+    val allowedLicenses = project.objects.setProperty<String>().convention(
+        setOf(
             "MIT License",
             "MIT-0",
             "Apache License, Version 2.0",
@@ -53,14 +55,14 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
             "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0",
             "Eclipse Public License - v 1.0",
             "PUBLIC DOMAIN",
-        ))
+        )
+    )
 
     companion object {
         fun Project.applyLicenseCheckExtension(baseExtension: ExtensionAware) {
-            val allowedLicensesFileLocation = File("${buildDir}/tmp/allowed-licenses.json")
+            val allowedLicensesFileLocation = File(buildDir, "tmp/allowed-licenses.json")
 
-            val licenseCheckExtension =
-                baseExtension.extensions.create("licenseCheck", LicenseCheckExtension::class, project)
+            val thisExtension = baseExtension.extensions.create("licenseCheck", LicenseCheckExtension::class, project)
 
             try {
                 val check = tasks.named("check")
@@ -72,24 +74,26 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                 }
 
                 tasks.named<com.github.jk1.license.task.ReportTask>("generateLicenseReport") {
-                    inputs.property("ownedDependencies", licenseCheckExtension.ownedDependencies)
+                    inputs.property("ownedDependencies", thisExtension.ownedDependencies)
                 }
 
-                val checkLicense = tasks.named<com.github.jk1.license.task.CheckLicenseTask>("checkLicense")
-
-                checkLicense {
-                    inputs.property("allowedLicenses", licenseCheckExtension.allowedLicenses)
-                    inputs.property("ownedDependencies", licenseCheckExtension.ownedDependencies)
+                val checkLicense = tasks.named<com.github.jk1.license.task.CheckLicenseTask>("checkLicense") {
+                    inputs.property("allowedLicenses", thisExtension.allowedLicenses)
+                    inputs.property("ownedDependencies", thisExtension.ownedDependencies)
 
                     onlyIf {
-                        licenseCheckExtension.skip.map { !it }.get()
+                        thisExtension.skip.map { !it }.get()
                     }
 
                     doFirst {
                         allowedLicensesFileLocation.parentFile.mkdirs()
                         allowedLicensesFileLocation.writeText(
-                            licenseCheckExtension.allowedLicenses.get()
-                                .joinToString(",\n", "{\"allowedLicenses\":[\n", "\n]}") { "  {\"moduleLicense\":\"$it\"}" }
+                            thisExtension.allowedLicenses.get()
+                                .joinToString(
+                                    ",\n",
+                                    "{\"allowedLicenses\":[\n",
+                                    "\n]}"
+                                ) { "  {\"moduleLicense\":\"$it\"}" }
                         )
                     }
                 }
@@ -99,14 +103,14 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                 }
 
                 afterEvaluate {
-                    if (licenseCheckExtension.skip.get()) {
-                        logger.warn("checkLicense is disabled!")
+                    if (thisExtension.skip.get()) {
+                        logger.warn("licenseCheck is disabled!")
                     }
 
                     extensions.getByName<com.github.jk1.license.LicenseReportExtension>("licenseReport").apply {
                         renderers = arrayOf(
                             SimpleHtmlReportRenderer(),
-                            JsonReportRenderer("project-licenses-for-check-license-task.json",false),
+                            JsonReportRenderer("project-licenses-for-check-license-task.json", false),
                         )
                         excludeBoms = true
                         excludes = arrayOf(
@@ -115,7 +119,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                         )
 
                         filters = arrayOf<DependencyFilter>(
-                            OwnedDependencyFilter(licenseCheckExtension.ownedDependencies.get()),
+                            OwnedDependencyFilter(thisExtension.ownedDependencies.get()),
                             CoroutinesFilter(),
                             com.github.jk1.license.filter.LicenseBundleNormalizer(),
                         )
@@ -125,7 +129,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                 }
             } catch (e: Exception) {
                 println(e)
-                logger.error("dependencyCheck will not be applied due to exception", e)
+                logger.error("licenseCheck will not be applied due to exception", e)
             }
         }
     }
