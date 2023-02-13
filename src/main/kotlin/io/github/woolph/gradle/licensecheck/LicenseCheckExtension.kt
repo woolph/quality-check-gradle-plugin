@@ -55,6 +55,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
             "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0",
             "Eclipse Public License - v 1.0",
             "PUBLIC DOMAIN",
+            "Bouncy Castle Licence", // is essentially the "MIT License"
         )
     )
 
