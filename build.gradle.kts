@@ -35,6 +35,7 @@ dependencies {
     implementation(libs.dependencyCheck)
     implementation(libs.sonarQube)
     implementation(libs.licenseReport)
+    implementation(libs.kotlinxDatetime)
 
     runtimeOnly(libs.databaseDrivers.postgres)
     runtimeOnly(libs.databaseDrivers.mssql)

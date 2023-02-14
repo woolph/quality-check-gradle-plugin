@@ -37,6 +37,8 @@ class QualityCheckPluginTests {
                 id 'io.github.woolph.quality-check'
             }
             
+            group = 'io.github.woolph.test'
+            
             qualityCheck {
                 dependencyCheck {
                     skip = true
@@ -75,6 +77,8 @@ class QualityCheckPluginTests {
                 id 'java'
                 id 'io.github.woolph.quality-check'
             }
+            
+            group = 'io.github.woolph.test'
             
             qualityCheck {
                 dependencyCheck {
@@ -124,6 +128,8 @@ class QualityCheckPluginTests {
                 id 'io.github.woolph.quality-check'
             }
             
+            group = 'io.github.woolph.test'
+            
             qualityCheck {
                 dependencyCheck {
                     skip = true
@@ -160,6 +166,8 @@ class QualityCheckPluginTests {
                 id 'java'
                 id 'io.github.woolph.quality-check'
             }
+            
+            group = 'io.github.woolph.test'
             
             qualityCheck {
                 dependencyCheck {
@@ -200,6 +208,8 @@ class QualityCheckPluginTests {
                 id 'java'
                 id 'io.github.woolph.quality-check'
             }
+            
+            group = 'io.github.woolph.test'
             
             repositories {
                 mavenCentral()
@@ -249,6 +259,8 @@ class QualityCheckPluginTests {
                 id 'java'
                 id 'io.github.woolph.quality-check'
             }
+            
+            group = 'io.github.woolph.test'
             
             repositories {
                 mavenCentral()
