@@ -20,7 +20,8 @@ import java.io.File
 import javax.inject.Inject
 
 abstract class LicenseCheckExtension @Inject constructor(project: Project) : Skipable {
-    override val skip = project.objects.property<Boolean>().convention(false)
+    override val skip = project.objects.property<Boolean>()
+        .convention(false)
 
     /**
      * set of regex which match the names of the modules which are considered to be owned by the projects owner.
@@ -87,6 +88,9 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
         infix fun Regex.until(validUntil: String) = until(Instant.parse(validUntil))
     }
 
+    /**
+     * DSL helper for setting up whiteListedDependencies
+     */
     fun whiteListedDependencies(action: Action<WhiteListedDependenciesBuilder>) {
         val whiteListedDependenciesBuilder = WhiteListedDependenciesBuilder()
 
@@ -102,7 +106,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
     }
 
     companion object {
-        fun Project.applyLicenseCheckExtension(baseExtension: ExtensionAware) {
+        internal fun Project.applyLicenseCheckExtension(baseExtension: ExtensionAware) {
             val allowedLicensesFileLocation = File(buildDir, "tmp/allowed-licenses.json")
 
             val thisExtension = baseExtension.extensions.create("licenseCheck", LicenseCheckExtension::class, project)

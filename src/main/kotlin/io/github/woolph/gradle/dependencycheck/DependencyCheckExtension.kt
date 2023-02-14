@@ -1,6 +1,7 @@
 /* Copyright 2023 ENGEL Austria GmbH */
-package io.github.woolph.gradle
+package io.github.woolph.gradle.dependencycheck
 
+import io.github.woolph.gradle.Skipable
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.ExtensionAware
@@ -33,7 +34,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
         .convention(project.layout.projectDirectory.file("dependency-check-suppression.xml"))
 
     companion object {
-        fun Project.applyDependencyCheckExtension(baseExtension: ExtensionAware) {
+        internal fun Project.applyDependencyCheckExtension(baseExtension: ExtensionAware) {
             val thisExtension = baseExtension.extensions.create("dependencyCheck", DependencyCheckExtension::class, project)
 
             try {

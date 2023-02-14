@@ -1,6 +1,7 @@
 /* Copyright 2023 ENGEL Austria GmbH */
-package io.github.woolph.gradle
+package io.github.woolph.gradle.sonar
 
+import io.github.woolph.gradle.Skipable
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
@@ -11,7 +12,7 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.property
 import javax.inject.Inject
 
-abstract class SonarqubeExtension @Inject constructor(project: Project) : Skipable {
+abstract class SonarQubeExtension @Inject constructor(project: Project) : Skipable {
     override val skip: Property<Boolean> = project.objects.property<Boolean>()
         .convention(false)
 
@@ -25,11 +26,15 @@ abstract class SonarqubeExtension @Inject constructor(project: Project) : Skipab
      * It is set to UNKNOWN by default.
      */
     val edition: Property<SonarQubeEdition> = project.objects.property<SonarQubeEdition>()
-        .convention(SonarQubeEdition.of(project.properties["sonarqube.edition"].toString()) ?: SonarQubeEdition.UNKNOWN)
+        .convention(
+            project.providers.gradleProperty("sonarqube.edition").map {
+                SonarQubeEdition.of(it) ?: SonarQubeEdition.UNKNOWN
+            }.orElse(SonarQubeEdition.UNKNOWN)
+        )
 
     companion object {
-        fun Project.applySonarQubeExtension(baseExtension: ExtensionAware) {
-            val thisExtension = baseExtension.extensions.create("sonarQube", SonarqubeExtension::class, project)
+        internal fun Project.applySonarQubeExtension(baseExtension: ExtensionAware) {
+            val thisExtension = baseExtension.extensions.create("sonarQube", SonarQubeExtension::class, project)
 
             try {
                 val check = tasks.named("check")

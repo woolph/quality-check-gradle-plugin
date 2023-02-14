@@ -1,5 +1,5 @@
 /* Copyright 2023 ENGEL Austria GmbH */
-package io.github.woolph.gradle
+package io.github.woolph.gradle.sonar
 
 enum class SonarQubeEdition {
     UNKNOWN,
