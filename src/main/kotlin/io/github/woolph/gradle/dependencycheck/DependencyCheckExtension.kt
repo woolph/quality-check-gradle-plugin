@@ -63,7 +63,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                         formats = listOf(
                             org.owasp.dependencycheck.reporting.ReportGenerator.Format.HTML,
                             org.owasp.dependencycheck.reporting.ReportGenerator.Format.JUNIT,
-                        )
+                        ).map { it.toString() }
                         if (thisExtension.suppressionFile.get().asFile.exists()) {
                             logger.warn("dependencyCheck suppression file ${thisExtension.suppressionFile.get()} is being applied")
                             suppressionFile = thisExtension.suppressionFile.get().asFile.toString()
