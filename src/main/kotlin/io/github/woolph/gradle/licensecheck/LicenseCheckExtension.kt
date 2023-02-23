@@ -179,7 +179,10 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                         )
                         excludeBoms = true
                         excludes = arrayOf(
-                            "org.springframework.boot:spring-boot-dependencies", // otherwise this bom is not excluded!
+                            // otherwise this bom is not excluded!
+                            "org.springframework.boot:spring-boot-dependencies",
+                            "org.springframework.cloud:spring-cloud-dependencies",
+                            "org.springframework.cloud:spring-cloud-sleuth-otel-dependencies",
                         )
 
                         val whiteListedDependencies =

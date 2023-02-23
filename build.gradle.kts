@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.github.woolph.quality-check"
-version = "1.1.0"
+version = "1.1.1"
 
 pluginBundle {
     website = "https://github.com/woolph/quality-check-gradle-plugin"
