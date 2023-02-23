@@ -22,13 +22,13 @@ internal class WhiteListedDependencyFilter(val logger: Logger, val regexProvider
                     configurationData.name,
                     configurationData.dependencies.filter { moduleData ->
                         !regexs.any { it.matches("${moduleData.group}:${moduleData.name}") }
-                    }.toSet()
+                    }.toSet(),
                 )
             }.toSet(),
             source.importedModules.map {
                 ImportedModuleBundle(
                     it.name,
-                    it.modules.filter { moduleData -> !regexs.any { it.matches(moduleData.name) } }
+                    it.modules.filter { moduleData -> !regexs.any { it.matches(moduleData.name) } },
                 )
             }.toList(),
         )

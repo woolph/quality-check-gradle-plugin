@@ -29,7 +29,7 @@ abstract class SonarQubeExtension @Inject constructor(project: Project) : Skipab
         .convention(
             project.providers.gradleProperty("sonarqube.edition").map {
                 SonarQubeEdition.of(it) ?: SonarQubeEdition.UNKNOWN
-            }.orElse(SonarQubeEdition.UNKNOWN)
+            }.orElse(SonarQubeEdition.UNKNOWN),
         )
 
     companion object {

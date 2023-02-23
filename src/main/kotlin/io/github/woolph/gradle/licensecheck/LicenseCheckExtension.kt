@@ -31,7 +31,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
     val ownedDependencies = project.objects.setProperty<Regex>().value(
         project.providers.provider { project.group }
             .map { it.toString().split(".").take(2).joinToString(".") }
-            .map { setOf(Regex("^${Regex.escape(it)}(\\.)?.*")) }
+            .map { setOf(Regex("^${Regex.escape(it)}(\\.)?.*")) },
     )
 
     /**
@@ -67,7 +67,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
             "Eclipse Public License - v 1.0",
             "PUBLIC DOMAIN",
             "Bouncy Castle Licence", // is essentially the "MIT License"
-        )
+        ),
     )
 
     inner class WhiteListedDependenciesBuilder {
@@ -99,9 +99,10 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
         this@LicenseCheckExtension.whiteListedDependencies.addAll(
             whiteListedDependenciesBuilder.whiteListedDependencies.entries.map { (regex, instant) ->
                 WhiteListedDependency(
-                    regex, instant
+                    regex,
+                    instant,
                 )
-            }
+            },
         )
     }
 
@@ -124,7 +125,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                     inputs.property("ownedDependencies", thisExtension.ownedDependencies)
                     inputs.property(
                         "whiteListedDependencies",
-                        thisExtension.whiteListedDependencies.map { it.map { it.toString() } }
+                        thisExtension.whiteListedDependencies.map { it.map { it.toString() } },
                     )
                 }
 
@@ -133,7 +134,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                     inputs.property("ownedDependencies", thisExtension.ownedDependencies)
                     inputs.property(
                         "whiteListedDependencies",
-                        thisExtension.whiteListedDependencies.map { it.map { it.toString() } }
+                        thisExtension.whiteListedDependencies.map { it.map { it.toString() } },
                     )
 
                     onlyIf {
@@ -144,8 +145,10 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                         allowedLicensesFileLocation.parentFile.mkdirs()
                         allowedLicensesFileLocation.writeText(
                             thisExtension.allowedLicenses.get().joinToString(
-                                ",\n", "{\"allowedLicenses\":[\n", "\n]}"
-                            ) { "  {\"moduleLicense\":\"$it\"}" }
+                                ",\n",
+                                "{\"allowedLicenses\":[\n",
+                                "\n]}",
+                            ) { "  {\"moduleLicense\":\"$it\"}" },
                         )
                     }
                 }
@@ -164,10 +167,10 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                             if (expiredWhiteListDependencies.isNotEmpty()) {
                                 logger.warn(
                                     "The following whiteListedDependencies have expired: [${
-                                    expiredWhiteListDependencies.joinToString(
-                                        ", "
-                                    )
-                                    }]"
+                                        expiredWhiteListDependencies.joinToString(
+                                            ", ",
+                                        )
+                                    }]",
                                 )
                             }
                         }
@@ -189,7 +192,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                             thisExtension.ownedDependencies.zip(
                                 thisExtension.whiteListedDependencies.map {
                                     it.filter(not(::expiredWhiteListedDependencies)).map { it.moduleNamePattern }
-                                }
+                                },
                             ) { a, b -> a union b }
 
                         filters = arrayOf<DependencyFilter>(

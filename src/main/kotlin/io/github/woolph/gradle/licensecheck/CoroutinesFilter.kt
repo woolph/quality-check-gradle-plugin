@@ -39,25 +39,25 @@ internal class CoroutinesFilter : DependencyFilter {
                                         mutableSetOf(
                                             License(
                                                 "Apache License, Version 2.0",
-                                                "https://www.apache.org/licenses/LICENSE-2.0"
-                                            )
+                                                "https://www.apache.org/licenses/LICENSE-2.0",
+                                            ),
                                         ),
                                         null,
                                         setOf(PomDeveloper("JetBrains Team", "", "")),
-                                    )
-                                )
+                                    ),
+                                ),
                             )
                         } else {
                             moduleData
                         }
-                    }.toSet()
+                    }.toSet(),
                 )
             }.toSet(),
             source.importedModules.map {
                 ImportedModuleBundle(
                     it.name,
                     it.modules.map { moduleData ->
-                        if (moduleData.name == "org.jetbrains.kotlinx:kotlinx-coroutines-core" && moduleData.version == "1.6.4")
+                        if (moduleData.name == "org.jetbrains.kotlinx:kotlinx-coroutines-core" && moduleData.version == "1.6.4") {
                             ImportedModuleData(
                                 moduleData.name,
                                 moduleData.version,
@@ -65,9 +65,10 @@ internal class CoroutinesFilter : DependencyFilter {
                                 "Apache License, Version 2.0",
                                 "https://www.apache.org/licenses/LICENSE-2.0",
                             )
-                        else
+                        } else {
                             moduleData
-                    }
+                        }
+                    },
                 )
             }.toList(),
         )

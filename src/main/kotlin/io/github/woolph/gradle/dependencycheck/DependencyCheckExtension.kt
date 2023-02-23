@@ -72,13 +72,13 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                         scanConfigurations = configurations.filter {
                             !it.name.startsWith("test") &&
                                 it.name.contains("DependenciesMetadata") && (
-                                it.name.startsWith("api") ||
-                                    it.name.startsWith("implementation") ||
-                                    it.name.startsWith("runtimeOnly") ||
-                                    it.name.contains("Api") ||
-                                    it.name.contains("Implementation") ||
-                                    it.name.contains("RuntimeOnly")
-                                )
+                                    it.name.startsWith("api") ||
+                                        it.name.startsWith("implementation") ||
+                                        it.name.startsWith("runtimeOnly") ||
+                                        it.name.contains("Api") ||
+                                        it.name.contains("Implementation") ||
+                                        it.name.contains("RuntimeOnly")
+                                    )
                         }.map {
                             it.name
                         }
@@ -97,7 +97,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                                     if (project.hasProperty("DEPENDENCY_CHECK_DB_PASSWORD")) {
                                         setProperty("password", project.properties["DEPENDENCY_CHECK_DB_PASSWORD"])
                                     }
-                                }
+                                },
                             )
                         } else {
                             logger.warn("dependencyCheck using default settings for data")

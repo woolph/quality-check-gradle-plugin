@@ -29,7 +29,7 @@ class QualityCheckPluginTests {
         settingsFile.writeText(
             """
             rootProject.name = 'dependency-check-skip'
-            """.trimIndent()
+            """.trimIndent(),
         )
         buildFile.writeText(
             """
@@ -50,7 +50,7 @@ class QualityCheckPluginTests {
                     skip = true
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result: BuildResult = GradleRunner.create()
@@ -69,7 +69,7 @@ class QualityCheckPluginTests {
         settingsFile.writeText(
             """
             rootProject.name = 'dependency-check-skip'
-            """.trimIndent()
+            """.trimIndent(),
         )
         buildFile.writeText(
             """
@@ -91,7 +91,7 @@ class QualityCheckPluginTests {
                     skip = true
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result: BuildResult = GradleRunner.create()
@@ -119,7 +119,7 @@ class QualityCheckPluginTests {
         settingsFile.writeText(
             """
             rootProject.name = 'dependency-check-skip'
-            """.trimIndent()
+            """.trimIndent(),
         )
         buildFile.writeText(
             """
@@ -135,7 +135,7 @@ class QualityCheckPluginTests {
                     skip = true
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result: BuildResult = GradleRunner.create()
@@ -158,7 +158,7 @@ class QualityCheckPluginTests {
         settingsFile.writeText(
             """
             rootProject.name = 'dependency-check-skip'
-            """.trimIndent()
+            """.trimIndent(),
         )
         buildFile.writeText(
             """
@@ -174,7 +174,7 @@ class QualityCheckPluginTests {
                     skip = true
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result: BuildResult = GradleRunner.create()
@@ -200,7 +200,7 @@ class QualityCheckPluginTests {
         settingsFile.writeText(
             """
             rootProject.name = 'licenseCheckOnly'
-            """.trimIndent()
+            """.trimIndent(),
         )
         buildFile.writeText(
             """
@@ -227,7 +227,7 @@ class QualityCheckPluginTests {
                     skip = true
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result: BuildResult = GradleRunner.create()
@@ -251,7 +251,7 @@ class QualityCheckPluginTests {
         settingsFile.writeText(
             """
             rootProject.name = 'licenseCheckOnly'
-            """.trimIndent()
+            """.trimIndent(),
         )
         buildFile.writeText(
             """
@@ -281,7 +281,7 @@ class QualityCheckPluginTests {
                     allowedLicenses = ["MIT-0"]
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result: BuildResult = GradleRunner.create()
