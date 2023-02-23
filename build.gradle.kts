@@ -9,19 +9,16 @@ plugins {
 group = "io.github.woolph.quality-check"
 version = "1.1.1"
 
-pluginBundle {
-    website = "https://github.com/woolph/quality-check-gradle-plugin"
-    vcsUrl = "https://github.com/woolph/quality-check-gradle-plugin"
-    tags = listOf("code quality", "security")
-}
-
 gradlePlugin {
+    website.set("https://github.com/woolph/quality-check-gradle-plugin")
+    vcsUrl.set("https://github.com/woolph/quality-check-gradle-plugin")
     plugins {
         create("quality-check") {
             id = "io.github.woolph.quality-check"
             implementationClass = "io.github.woolph.gradle.QualityCheckPlugin"
             displayName = "ENGEL Quality Check"
             description = "Adds dependency check, license check, and sonarqube to your build."
+            tags.set(listOf("code quality", "security"))
         }
     }
 }
@@ -46,9 +43,11 @@ dependencies {
     //endregion
 }
 
-java {
-    sourceCompatibility = libs.versions.jvmTarget.map { JavaVersion.toVersion(it) }.get()
+kotlin {
+    jvmToolchain(libs.versions.jvmTarget.map { it.toInt() }.get())
+}
 
+java {
     withSourcesJar()
     withJavadocJar()
 }
