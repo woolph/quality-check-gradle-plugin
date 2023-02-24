@@ -10,9 +10,20 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
+import java.util.stream.Stream
 
 class QualityCheckPluginTests {
+    companion object {
+        @JvmStatic
+        fun supportedGradleVersions(): Stream<String> = SUPPORTED_GRADLE_VERSIONS.stream()
+
+        @JvmStatic
+        val SUPPORTED_GRADLE_VERSIONS = listOf("8.0.1", "7.6") // TODO consider supporting 6.9.4 as well (but Licensecheck plugin does need to be downgraded for this
+    }
+
     @TempDir
     lateinit var testProjectDir: File
     lateinit var settingsFile: File
@@ -24,8 +35,9 @@ class QualityCheckPluginTests {
         buildFile = File(testProjectDir, "build.gradle")
     }
 
-    @Test
-    fun `project without test task`() {
+    @ParameterizedTest
+    @MethodSource("supportedGradleVersions")
+    fun `project without test task`(gradleVersion: String) {
         settingsFile.writeText(
             """
             rootProject.name = 'dependency-check-skip'
@@ -54,6 +66,7 @@ class QualityCheckPluginTests {
         )
 
         val result: BuildResult = GradleRunner.create()
+            .withGradleVersion(gradleVersion)
             .withProjectDir(testProjectDir)
             .withArguments("build")
             .withPluginClasspath()
@@ -64,8 +77,9 @@ class QualityCheckPluginTests {
         assertTrue(result.output.contains("sonarqube will not be applied due to exception"))
     }
 
-    @Test
-    fun `set dependency check to skip`() {
+    @ParameterizedTest
+    @MethodSource("supportedGradleVersions")
+    fun `set dependency check to skip`(gradleVersion: String) {
         settingsFile.writeText(
             """
             rootProject.name = 'dependency-check-skip'
@@ -95,6 +109,7 @@ class QualityCheckPluginTests {
         )
 
         val result: BuildResult = GradleRunner.create()
+            .withGradleVersion(gradleVersion)
             .withProjectDir(testProjectDir)
             .withArguments("check")
             .withPluginClasspath()
@@ -114,8 +129,9 @@ class QualityCheckPluginTests {
         println(result.task(":dependencyCheckAnalyze")?.path)
     }
 
-    @Test
-    fun `set sonarqube edition to community for non pull request`() {
+    @ParameterizedTest
+    @MethodSource("supportedGradleVersions")
+    fun `set sonarqube edition to community for non pull request`(gradleVersion: String) {
         settingsFile.writeText(
             """
             rootProject.name = 'dependency-check-skip'
@@ -139,6 +155,7 @@ class QualityCheckPluginTests {
         )
 
         val result: BuildResult = GradleRunner.create()
+            .withGradleVersion(gradleVersion)
             .withProjectDir(testProjectDir)
             .withArguments("check", "--stacktrace", "-Psonarqube.edition=community")
             .withEnvironment(mapOf("BUILD_REASON" to "Scheduled"))
@@ -153,8 +170,9 @@ class QualityCheckPluginTests {
         assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
     }
 
-    @Test
-    fun `set sonarqube edition to community for pull request`() {
+    @ParameterizedTest
+    @MethodSource("supportedGradleVersions")
+    fun `set sonarqube edition to community for pull request`(gradleVersion: String) {
         settingsFile.writeText(
             """
             rootProject.name = 'dependency-check-skip'
@@ -178,6 +196,7 @@ class QualityCheckPluginTests {
         )
 
         val result: BuildResult = GradleRunner.create()
+            .withGradleVersion(gradleVersion)
             .withProjectDir(testProjectDir)
             .withArguments("check", "--stacktrace", "-Psonarqube.edition=community")
             .withEnvironment(mapOf("BUILD_REASON" to "PullRequest"))
@@ -195,8 +214,9 @@ class QualityCheckPluginTests {
         println(result.task(":dependencyCheckAnalyze")?.path)
     }
 
-    @Test
-    fun `licenseCheck succeeds for allowed license`() {
+    @ParameterizedTest
+    @MethodSource("supportedGradleVersions")
+    fun `licenseCheck succeeds for allowed license`(gradleVersion: String) {
         settingsFile.writeText(
             """
             rootProject.name = 'licenseCheckOnly'
@@ -231,6 +251,7 @@ class QualityCheckPluginTests {
         )
 
         val result: BuildResult = GradleRunner.create()
+            .withGradleVersion(gradleVersion)
             .withProjectDir(testProjectDir)
             .withArguments("check")
             .withPluginClasspath()
@@ -246,8 +267,9 @@ class QualityCheckPluginTests {
         println(result.task(":dependencyCheckAnalyze")?.path)
     }
 
-    @Test
-    fun `licenseCheck fails for not allowed license`() {
+    @ParameterizedTest
+    @MethodSource("supportedGradleVersions")
+    fun `licenseCheck fails for not allowed license`(gradleVersion: String) {
         settingsFile.writeText(
             """
             rootProject.name = 'licenseCheckOnly'
@@ -285,6 +307,7 @@ class QualityCheckPluginTests {
         )
 
         val result: BuildResult = GradleRunner.create()
+            .withGradleVersion(gradleVersion)
             .withProjectDir(testProjectDir)
             .withArguments("check")
             .withPluginClasspath()
@@ -292,4 +315,6 @@ class QualityCheckPluginTests {
 
         assertEquals(TaskOutcome.FAILED, result.task(":checkLicense")?.outcome)
     }
+
+    // TODO also test kotlin dsl
 }

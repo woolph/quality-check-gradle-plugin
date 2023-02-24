@@ -33,13 +33,15 @@ dependencies {
     implementation(libs.sonarQube)
     implementation(libs.licenseReport)
     implementation(libs.kotlinxDatetime)
+    implementation(libs.kotlinxSerialization.json)
 
     runtimeOnly(libs.databaseDrivers.postgres)
     runtimeOnly(libs.databaseDrivers.mssql)
 
     //region unit test dependencies
     testImplementation(gradleTestKit())
-    testImplementation(libs.test.junit)
+    testImplementation(libs.test.junit.params)
+    testRuntimeOnly(libs.test.junit.engine)
     //endregion
 }
 
