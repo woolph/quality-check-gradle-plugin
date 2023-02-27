@@ -1,0 +1,13 @@
+/**
+ * Copyright 2023 Wolfgang Mayer
+ */
+{
+  "bundles" : [
+    { "bundleName" : "Antlr BSD-3-Clause", "licenseName" : "The 3-Clause BSD License", "licenseUrl" : "https://www.antlr.org/license.html" },
+    { "bundleName" : "CDDL1", "licenseName" : "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0", "licenseUrl" : "https://oss.oracle.com/licenses/CDDL" }
+  ],
+  "transformationRules" : [
+    { "bundleName" : "Antlr BSD-3-Clause", "licenseUrlPattern" : ".*(www\\.)?antlr\\.org/license\\.(html|htm)" },
+    { "bundleName" : "CDDL1", "licenseUrlPattern" : ".*(www\\.)?opensource\\.org/licenses/cddl1\\.php" }
+  ]
+}

@@ -2,15 +2,23 @@
 package io.github.woolph.gradle.dependencycheck
 
 import io.github.woolph.gradle.Skipable
+import io.github.woolph.gradle.dependencycheck.suppression.CheckSuppressionFileTask
+import io.github.woolph.gradle.dependencycheck.suppression.GenerateSuppressionFileTask
+import io.github.woolph.gradle.dependencycheck.suppression.UpdateSuppressionFileTask
 import org.gradle.api.Project
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.delegateClosureOf
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.named
+import java.io.File
 import javax.inject.Inject
 
 abstract class DependencyCheckExtension @Inject constructor(project: Project) : Skipable {
@@ -34,6 +42,18 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
         .convention(project.layout.projectDirectory.file("dependency-check-suppression.xml"))
 
     companion object {
+        internal fun Project.getParentDirectoryOf(file: Provider<RegularFile>): Provider<Directory> = file.map {
+            layout.projectDirectory.asFile.toPath().relativize(it.asFile.parentFile.toPath()).toString()
+        }.map {
+            if (it.isNotEmpty())
+                layout.projectDirectory.dir(it)
+            else
+                layout.projectDirectory
+        }
+
+        internal fun Project.makeSibling(file: RegularFileProperty, fileNamePattern: (File) -> String): Provider<RegularFile> =
+            getParentDirectoryOf(file).map { it.file(fileNamePattern(file.asFile.get())) }
+
         internal fun Project.applyDependencyCheckExtension(baseExtension: ExtensionAware) {
             val thisExtension = baseExtension.extensions.create("dependencyCheck", DependencyCheckExtension::class, project)
 
@@ -42,11 +62,27 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
 
                 plugins.apply("org.owasp.dependencycheck")
 
+                val checkSuppressionFileTask = tasks.create<CheckSuppressionFileTask>("checkSuppressionFile") {
+                    originalSuppressionFile.convention(thisExtension.suppressionFile)
+                }
+
+                tasks.create<GenerateSuppressionFileTask>("generateSuppressionFile") {
+                    originalSuppressionFile.convention(thisExtension.suppressionFile)
+                    suppressionFile.convention(makeSibling(thisExtension.suppressionFile) { it.nameWithoutExtension + ".new." + it.extension })
+                }
+
+                tasks.create<UpdateSuppressionFileTask>("updateSuppressionFile") {
+                    originalSuppressionFile.convention(thisExtension.suppressionFile)
+                    suppressionFile.convention(makeSibling(thisExtension.suppressionFile) { it.nameWithoutExtension + ".new." + it.extension })
+                }
+
                 val dependencyCheckAnalyze = tasks.named<org.owasp.dependencycheck.gradle.tasks.Analyze>("dependencyCheckAnalyze") {
                     onlyIf {
                         thisExtension.skip.map { !it }.get()
                     }
+                    dependsOn(checkSuppressionFileTask)
                 }
+
 
                 check {
                     dependsOn(dependencyCheckAnalyze)
@@ -63,7 +99,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                         formats = listOf(
                             org.owasp.dependencycheck.reporting.ReportGenerator.Format.HTML,
                             org.owasp.dependencycheck.reporting.ReportGenerator.Format.JUNIT,
-                        ).map { it.toString() }
+                        )
                         if (thisExtension.suppressionFile.get().asFile.exists()) {
                             logger.warn("dependencyCheck suppression file ${thisExtension.suppressionFile.get()} is being applied")
                             suppressionFile = thisExtension.suppressionFile.get().asFile.toString()

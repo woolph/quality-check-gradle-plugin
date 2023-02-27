@@ -8,10 +8,13 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -26,6 +29,9 @@ abstract class CheckLicenseTaskJunitReport: DefaultTask() {
     @get:Input
     abstract val allowedLicenses: SetProperty<String>
 
+    @get:OutputDirectory
+    abstract val tmpDirectory: DirectoryProperty
+
     @get:InputFile
     abstract val projectDependenciesData: RegularFileProperty
 
@@ -35,6 +41,8 @@ abstract class CheckLicenseTaskJunitReport: DefaultTask() {
     init {
         group = "verification"
         description = "Check if License could be used"
+
+        tmpDirectory.convention(project.layout.buildDirectory.dir("tmp/license-check"))
     }
 
     @TaskAction
@@ -42,9 +50,9 @@ abstract class CheckLicenseTaskJunitReport: DefaultTask() {
         logger.info("Startup CheckLicense for ${getProject().name}")
         logger.info("Check licenses if they are allowed to use.")
 
-        val tmpDirectory = project.layout.buildDirectory.dir("tmp/license-check")
-        val checkResult = tmpDirectory.map { it.file(NOT_PASSED_DEPENDENCIES_FILE) }.get().asFile
-        val allowedLicensesFileLocation = tmpDirectory.map { it.file("allowedLicensesFile") }.get().asFile
+        tmpDirectory.asFile.get().mkdirs()
+        val checkResult = tmpDirectory.file(NOT_PASSED_DEPENDENCIES_FILE).get().asFile
+        val allowedLicensesFileLocation = tmpDirectory.file("allowedLicensesFile").get().asFile
 
         allowedLicensesFileLocation.parentFile.mkdirs()
         allowedLicensesFileLocation.writeText(

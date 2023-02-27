@@ -10,6 +10,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
@@ -66,6 +67,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
             "MIT License",
             "MIT-0",
             "Apache License, Version 2.0",
+            "BSD Zero Clause License",
             "The 2-Clause BSD License",
             "The 3-Clause BSD License",
             "GNU GENERAL PUBLIC LICENSE, Version 2 + Classpath Exception",
@@ -76,6 +78,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
         ),
     )
 
+    // FIXME this DSL does not yet work properly for Groovy!!!!
     inner class WhiteListedDependenciesBuilder {
         val whiteListedDependencies = mutableMapOf<Regex, Instant>()
 
@@ -115,6 +118,8 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
     companion object {
         internal fun Project.applyLicenseCheckExtension(baseExtension: ExtensionAware) {
             val thisExtension = baseExtension.extensions.create("licenseCheck", LicenseCheckExtension::class, project)
+            val tmpDirectory = project.layout.buildDirectory.dir("tmp/license-check")
+            val additonalLicenseNormalizerBundle = tmpDirectory.map { it.file("additional-license-normalizer-bundle.json") }
 
             try {
                 val check = tasks.named("check")
@@ -125,12 +130,17 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                     onlyIf { false } // skip this task cause it only adds a renderer
                 }
 
+                val createLicenseBundleNormalizerConfig = tasks.create<CreateLicenseBundleNormalizerConfigTask>("createLicenseBundleNormalizerConfig") {
+                    this.additonalLicenseNormalizerBundle.set(additonalLicenseNormalizerBundle)
+                }
+
                 val generateLicenseReport = tasks.named<com.github.jk1.license.task.ReportTask>("generateLicenseReport") {
                     inputs.property("ownedDependencies", thisExtension.ownedDependencies)
                     inputs.property(
                         "whiteListedDependencies",
                         thisExtension.whiteListedDependencies.map { it.map { it.toString() } },
                     )
+                    inputs.file(createLicenseBundleNormalizerConfig.additonalLicenseNormalizerBundle)
                 }
 
                 val checkLicense = tasks.create<CheckLicenseTaskJunitReport>("checkLicenses") {
@@ -138,6 +148,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                     allowedLicenses.set(thisExtension.allowedLicenses)
                     licenseCheckReport.set(thisExtension.reportsDirectory.file("license-check-report.xml"))
                     projectDependenciesData.set(thisExtension.reportsDirectory.file(CheckLicenseTaskJunitReport.PROJECT_JSON_FOR_LICENSE_CHECKING_FILE))
+                    this.tmpDirectory.set(tmpDirectory)
 
                     onlyIf {
                         thisExtension.skip.map { !it }.get()
@@ -189,11 +200,28 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                                 },
                             ) { a, b -> a union b }
 
+                        val additonalLicenseNormalizerBundleFile = additonalLicenseNormalizerBundle.get().asFile
+
+                        additonalLicenseNormalizerBundleFile.parentFile.mkdirs()
+//                        additonalLicenseNormalizerBundleFile.writeText("""
+//                            {
+//                              "bundles" : [
+//                                { "bundleName" : "Antlr BSD-3-Clause", "licenseName" : "The 3-Clause BSD License", "licenseUrl" : "https://www.antlr.org/license.html" },
+//                              ],
+//                              "transformationRules" : [
+//                                { "bundleName" : "Antlr BSD-3-Clause", "licenseUrlPattern" : ".*www\\.antlr\\.org/license\\.(html|htm)" },
+//                              ]
+//                            }
+//
+//                        """.trimIndent())
+
                         filters = arrayOf<DependencyFilter>(
                             WhiteListedDependencyFilter(logger, whiteListedDependencies),
                             CoroutinesFilter(),
                             AntlrRuntimeFilter(),
-                            com.github.jk1.license.filter.LicenseBundleNormalizer(),
+                            OnDemandBundleNormalizerFilter(
+                                createLicenseBundleNormalizerConfig.additonalLicenseNormalizerBundle
+                            ),
                         )
                     }
                 }
