@@ -10,7 +10,6 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
@@ -18,7 +17,6 @@ import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
-import java.io.File
 import javax.inject.Inject
 
 abstract class LicenseCheckExtension @Inject constructor(project: Project) : Skipable {
@@ -26,7 +24,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
         .convention(false)
 
     val reportsDirectory = project.objects.directoryProperty()
-        .convention(project.layout.buildDirectory.dir( "reports/dependency-license"))
+        .convention(project.layout.buildDirectory.dir("reports/dependency-license"))
 
     val licenseCheckReport = project.objects.fileProperty().convention(reportsDirectory.file("license-check-report.xml"))
 
@@ -220,7 +218,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                             CoroutinesFilter(),
                             AntlrRuntimeFilter(),
                             OnDemandBundleNormalizerFilter(
-                                createLicenseBundleNormalizerConfig.additonalLicenseNormalizerBundle
+                                createLicenseBundleNormalizerConfig.additonalLicenseNormalizerBundle,
                             ),
                         )
                     }

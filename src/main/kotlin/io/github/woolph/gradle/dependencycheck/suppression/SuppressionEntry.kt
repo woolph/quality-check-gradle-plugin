@@ -1,10 +1,10 @@
+/* Copyright 2023 ENGEL Austria GmbH */
 package io.github.woolph.gradle.dependencycheck.suppression
 
 import io.github.woolph.gradle.util.children
 import io.github.woolph.gradle.util.get
 import io.github.woolph.gradle.util.processXml
 import java.io.File
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -28,9 +28,11 @@ data class SuppressionEntry(
             appendLine("    <suppress>")
         }
         if (notes != null) {
-            appendLine("""        <notes><![CDATA[
+            appendLine(
+                """        <notes><![CDATA[
             ${notes.trim()}
-        ]]></notes>""")
+        ]]></notes>""",
+            )
         }
         if (packageUrlPattern) {
             appendLine("        <packageUrl regex=\"true\">$packageUrl</packageUrl>")
@@ -71,15 +73,17 @@ data class SuppressionEntry(
     }
 }
 fun Sequence<SuppressionEntry>.writeTo(file: File, desiredZoneId: ZoneId) {
-    file.writeText(buildString {
-        appendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-        appendLine("<suppressions xmlns=\"https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd\">")
-        this@writeTo.sortedBy { it.suppressUntil }.forEach {
-            append(it.asXmlTag(desiredZoneId))
-            appendLine()
-        }
-        appendLine("</suppressions>")
-    })
+    file.writeText(
+        buildString {
+            appendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+            appendLine("<suppressions xmlns=\"https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd\">")
+            this@writeTo.sortedBy { it.suppressUntil }.forEach {
+                append(it.asXmlTag(desiredZoneId))
+                appendLine()
+            }
+            appendLine("</suppressions>")
+        },
+    )
 }
 
 fun File.parseAsDependencyCheckSuppressionFile() = processXml { doc ->
@@ -89,8 +93,8 @@ fun File.parseAsDependencyCheckSuppressionFile() = processXml { doc ->
                 ?.let { SuppressionEntry.parseToZoneDateTime(it) }
             val (packageUrlPattern: Boolean?, packageUrl: String?) = suppression.children()
                 .firstOrNull { it.nodeName == "packageUrl" }?.let {
-                    it.attributes["regex"]?.value?.let { it == "true" } to it.textContent
-                } ?: (null to null)
+                it.attributes["regex"]?.value?.let { it == "true" } to it.textContent
+            } ?: (null to null)
             val suppressionNote =
                 suppression.children().filter { it.nodeName == "notes" }.firstOrNull()?.textContent
 

@@ -1,3 +1,4 @@
+/* Copyright 2023 ENGEL Austria GmbH */
 package io.github.woolph.gradle.dependencycheck.suppression
 
 import org.gradle.api.DefaultTask
@@ -5,15 +6,15 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import org.gradle.api.tasks.Optional
 
-
-abstract class UpdateSuppressionFileTask: DefaultTask() {
+abstract class UpdateSuppressionFileTask : DefaultTask() {
     @get:InputFile
+    @get:Optional
     abstract val originalSuppressionFile: RegularFileProperty
 
     @get:OutputFile
@@ -28,11 +29,11 @@ abstract class UpdateSuppressionFileTask: DefaultTask() {
 
     init {
         suppressionFile.convention(
-            project.layout.projectDirectory.file("dc-suppress-updated.xml")
+            project.layout.projectDirectory.file("dc-suppress-updated.xml"),
         )
 
         suppressUntil.convention(
-            project.providers.gradleProperty("suppressUntil").map { SuppressionEntry.parseToZoneDateTime(it) }
+            project.providers.gradleProperty("suppressUntil").map { SuppressionEntry.parseToZoneDateTime(it) },
         )
 
         desiredZoneId.convention(SuppressionEntry.DEFAULT_ZONE_ID)
@@ -40,15 +41,15 @@ abstract class UpdateSuppressionFileTask: DefaultTask() {
 
     @TaskAction
     fun updateSuppressionFile() {
-        val suppressUntil = suppressUntil.orNull
+        originalSuppressionFile.asFile.orNull
+            ?.parseAsDependencyCheckSuppressionFile()
+            ?.let { originalSuppressionEntries ->
+                val suppressUntil = suppressUntil.orNull
 
-        val originalSuppressionEntries = originalSuppressionFile.asFile.get()
-            .parseAsDependencyCheckSuppressionFile()
-            .map {
-                it.copy(suppressUntil = if (it.suppressUntil == null) null else (suppressUntil ?: it.suppressUntil))
+                originalSuppressionEntries
+                    .map {
+                        it.copy(suppressUntil = if (it.suppressUntil == null) null else (suppressUntil ?: it.suppressUntil))
+                    }.writeTo(suppressionFile.asFile.get(), desiredZoneId.get())
             }
-
-        originalSuppressionEntries
-            .writeTo(suppressionFile.asFile.get(), desiredZoneId.get())
     }
 }

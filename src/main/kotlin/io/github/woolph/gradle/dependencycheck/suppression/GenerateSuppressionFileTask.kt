@@ -1,3 +1,4 @@
+/* Copyright 2023 ENGEL Austria GmbH */
 package io.github.woolph.gradle.dependencycheck.suppression
 
 import io.github.woolph.gradle.util.children
@@ -11,15 +12,15 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-abstract class GenerateSuppressionFileTask: DefaultTask() {
+abstract class GenerateSuppressionFileTask : DefaultTask() {
     @get:InputFile
     abstract val dependencyCheckXmlReport: RegularFileProperty
 
     @get:InputFile
+    @get:Optional
     abstract val originalSuppressionFile: RegularFileProperty
 
     @get:OutputFile
@@ -34,15 +35,15 @@ abstract class GenerateSuppressionFileTask: DefaultTask() {
 
     init {
         dependencyCheckXmlReport.convention(
-            project.layout.buildDirectory.file("reports/dependency-check-junit.xml")
+            project.layout.buildDirectory.file("reports/dependency-check-junit.xml"),
         )
 
         suppressionFile.convention(
-            project.layout.projectDirectory.file("dc-suppress.xml")
+            project.layout.projectDirectory.file("dc-suppress.xml"),
         )
 
         suppressUntil.convention(
-            project.providers.gradleProperty("suppressUntil").map { SuppressionEntry.parseToZoneDateTime(it) }
+            project.providers.gradleProperty("suppressUntil").map { SuppressionEntry.parseToZoneDateTime(it) },
         )
 
         desiredZoneId.convention(SuppressionEntry.DEFAULT_ZONE_ID)
@@ -75,7 +76,7 @@ abstract class GenerateSuppressionFileTask: DefaultTask() {
             }
         }
 
-        val usedOriginalSuppressionEntries = if (includeAlreadySuppressed) {
+        val usedOriginalSuppressionEntries = if (includeAlreadySuppressed && originalSuppressionFile.isPresent) {
             val skippedVulnerabilities = dependencyCheckXmlReport.asFile.get().processXml { doc ->
                 doc.children().flatMap { testsuites ->
                     testsuites.children().filter {

@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -121,7 +120,7 @@ class QualityCheckPluginTests {
 
         assertEquals(TaskOutcome.UP_TO_DATE, result.task(":check")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicense")?.outcome)
+        assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":sonar")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":jacocoTestReport")?.outcome)
         assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
@@ -258,7 +257,7 @@ class QualityCheckPluginTests {
             .build()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":check")?.outcome)
-        assertEquals(TaskOutcome.SUCCESS, result.task(":checkLicense")?.outcome)
+        assertEquals(TaskOutcome.SUCCESS, result.task(":checkLicenses")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":sonar")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":jacocoTestReport")?.outcome)
@@ -313,8 +312,10 @@ class QualityCheckPluginTests {
             .withPluginClasspath()
             .buildAndFail()
 
-        assertEquals(TaskOutcome.FAILED, result.task(":checkLicense")?.outcome)
+        assertEquals(TaskOutcome.FAILED, result.task(":checkLicenses")?.outcome)
     }
 
     // TODO also test kotlin dsl
+
+    // TODO test for dependencyCheck
 }

@@ -1,3 +1,4 @@
+/* Copyright 2023 ENGEL Austria GmbH */
 package io.github.woolph.gradle.licensecheck
 
 import com.github.jk1.license.ProjectData
@@ -7,12 +8,14 @@ import org.gradle.api.provider.Provider
 
 class OnDemandBundleNormalizerFilter(
     val additonalLicenseNormalizerBundle: Provider<RegularFile>,
-): DependencyFilter {
+) : DependencyFilter {
     override fun filter(source: ProjectData?): ProjectData {
-        val licenseBundleNormalizer = com.github.jk1.license.filter.LicenseBundleNormalizer(mapOf(
-            "bundlePath" to additonalLicenseNormalizerBundle.get().asFile.toString(),
-            "createDefaultTransformationRules" to true,
-        ))
+        val licenseBundleNormalizer = com.github.jk1.license.filter.LicenseBundleNormalizer(
+            mapOf(
+                "bundlePath" to additonalLicenseNormalizerBundle.get().asFile.toString(),
+                "createDefaultTransformationRules" to true,
+            ),
+        )
 
         return licenseBundleNormalizer.filter(source)
     }

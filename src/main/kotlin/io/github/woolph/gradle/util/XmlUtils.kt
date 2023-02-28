@@ -1,3 +1,4 @@
+/* Copyright 2023 ENGEL Austria GmbH */
 package io.github.woolph.gradle.util
 
 import org.xml.sax.InputSource
@@ -6,8 +7,8 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 fun <R> File.processXml(
     dbFactory: DocumentBuilderFactory = DocumentBuilderFactory.newInstance(),
-    block: (org.w3c.dom.Document) -> R
-) : R = inputStream().use { inputStream ->
+    block: (org.w3c.dom.Document) -> R,
+): R = inputStream().use { inputStream ->
     block(dbFactory.newDocumentBuilder().parse(InputSource(inputStream)))
 }
 

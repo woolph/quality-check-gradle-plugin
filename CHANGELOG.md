@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased/Upcoming
 
+## [1.2.0]() - 2023-02-28
+### Added
+- Adding tasks for checking, generating, & updating the suppression file for dependency check
+
 ## [1.1.0]() - 2023-02-23
 ### Changed
 - Updated Sonar Plugin from 3.5.0 to 4.0.0.2929 to support gradle 8.0
