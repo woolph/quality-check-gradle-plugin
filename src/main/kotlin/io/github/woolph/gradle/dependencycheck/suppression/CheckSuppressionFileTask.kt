@@ -52,7 +52,7 @@ abstract class CheckSuppressionFileTask : DefaultTask() {
 
                 if (inappropriateEntries.isNotEmpty()) {
                     inappropriateEntries.forEach {
-                        logger.error("the suppression file entry for ${it.packageUrl} (${it.vulnerabilities.joinToString { it.name }}) does nneither contain FALSE POSITIVE note nor an appropriate expiration date")
+                        logger.error("the suppression file entry for ${it.packageUrl} (${it.vulnerabilities.joinToString { it.name }}) does neither contain FALSE POSITIVE note nor an appropriate expiration date")
                     }
                     throw GradleException("Some entries in the DC suppression file ${originalSuppressionFile.get()} do neither have a FALSE POSITIVE note nor an appropriate expiration date set (at max the suppression expiration should be one year)")
                 }
