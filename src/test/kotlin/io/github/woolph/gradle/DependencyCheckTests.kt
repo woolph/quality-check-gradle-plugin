@@ -214,9 +214,9 @@ class DependencyCheckTests {
             .withEnvironment(
                 mapOf(
                     "ORG_GRADLE_PROJECT_DEPENDENCY_CHECK_DB_DRIVER" to "h2",
-                    "ORG_GRADLE_PROJECT_DEPENDENCY_CHECK_DB_CONNECTION" = "blabla",
+                    "ORG_GRADLE_PROJECT_DEPENDENCY_CHECK_DB_CONNECTION" to "blabla",
                     "ORG_GRADLE_PROJECT_DEPENDENCY_CHECK_DB_USER" to "user",
-                )
+                ),
             )
             .build()
 
