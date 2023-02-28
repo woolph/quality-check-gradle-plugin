@@ -58,20 +58,22 @@ abstract class GenerateSuppressionFileTask : DefaultTask() {
             doc.children().flatMap { testsuites ->
                 testsuites.children().filter {
                     (it.attributes["failures"]?.value?.toInt() ?: 0) > 0
-                }.children().map { testcase ->
-                    val vulnerability = testcase.attributes["classname"]?.value ?: "unknown"
-                    val packageUrl = testcase.attributes["name"]?.value ?: "unknown"
-                    val suppressionNote = testcase.children().filter { it.nodeName == "skipped" }.firstOrNull()?.let {
-                        it.attributes["message"]?.value
-                    } ?: "TODO enter reason why this can be suppressed or otherwise fix it!"
+                }.children().mapNotNull { testcase ->
+                    testcase.attributes["classname"]?.value?.let { vulnerability ->
+                        val packageUrl = testcase.attributes["name"]?.value ?: "unknown"
+                        val suppressionNote = testcase.children().filter { it.nodeName == "skipped" }.firstOrNull()?.let {
+                            it.attributes["message"]?.value
+                        } ?: "TODO enter reason why this can be suppressed or otherwise fix it!\n" +
+                            "see details on http://web.nvd.nist.gov/view/vuln/detail?vulnId=$vulnerability"
 
-                    SuppressionEntry(
-                        packageUrl,
-                        listOf(Vulnerability(VulnerabilityType.VulnerabilityName, vulnerability)), // TODO determine correct VulnerabilityType
-                        notes = suppressionNote,
-                        suppressUntil = suppressUntil,
-                        packageUrlPattern = false,
-                    )
+                        SuppressionEntry(
+                            packageUrl,
+                            listOf(Vulnerability(VulnerabilityType.VulnerabilityName, vulnerability)), // TODO determine correct VulnerabilityType
+                            notes = suppressionNote,
+                            suppressUntil = suppressUntil,
+                            packageUrlPattern = false,
+                        )
+                    }
                 }
             }
         }
