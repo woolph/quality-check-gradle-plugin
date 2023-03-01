@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased/Upcoming
 
+## [1.2.2]() - 2023-03-01
+### Fixed
+- Fixing issue with generateSuppressionFile detecting whether an original suppression file exists
+
 ## [1.2.1]() - 2023-02-28
 ### Changed
 - Adding a link to the notes of new vulnerabilities in the result of the `generateSuppressionFile` task

@@ -9,6 +9,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.internal.provider.Providers
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -54,13 +55,15 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
         internal fun Project.makeSibling(file: RegularFileProperty, fileNamePattern: (File) -> String): Provider<RegularFile> =
             getParentDirectoryOf(file).zip(file) { parent, file -> parent.file(fileNamePattern(file.asFile)) }
 
-        internal fun RegularFileProperty.filterExists(): Provider<RegularFile> = this.map {
-            if (it.asFile.exists()) {
-                it
+        internal fun <T> Provider<T>.filter(predicate: (T) -> Boolean): Provider<T> = flatMap {
+            if (predicate(it)) {
+                this
             } else {
-                null as RegularFile
+                Providers.notDefined()
             }
         }
+
+        internal fun Provider<RegularFile>.filterExists(): Provider<RegularFile> = filter { it.asFile.exists() }
 
         internal fun Project.applyDependencyCheckExtension(baseExtension: ExtensionAware) {
             val thisExtension = baseExtension.extensions.create("dependencyCheck", DependencyCheckExtension::class, project)
