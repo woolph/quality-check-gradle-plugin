@@ -68,7 +68,7 @@ abstract class CheckLicenseTaskJunitReport : DefaultTask() {
             )
         } finally {
             val modulesWithUnallowedLicenses = (Json.parseToJsonElement(checkResult.readText()).jsonObject["dependenciesWithoutAllowedLicenses"]?.jsonArray ?: emptyList()).map {
-                val module = "${it.jsonObject["moduleName"]?.jsonPrimitive?.content}:${it.jsonObject["moduleName"]?.jsonPrimitive?.content}"
+                val module = "${it.jsonObject["moduleName"]?.jsonPrimitive?.content}"
                 val license = "${it.jsonObject["moduleLicense"]?.jsonPrimitive?.content}"
                 module to license
             }.groupBy(Pair<String, String>::first, Pair<String, String>::second)
