@@ -30,7 +30,7 @@ data class SuppressionEntry(
         if (notes != null) {
             appendLine(
                 """        <notes><![CDATA[
-            ${notes.trim()}
+            ${notes.trim().replace(Regex("(\r?\n)\\s*")) { "${it.groups[1]?.value!!}            " }}
         ]]></notes>""",
             )
         }

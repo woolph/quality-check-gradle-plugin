@@ -4,6 +4,7 @@ package io.github.woolph.gradle.dependencycheck
 import io.github.woolph.gradle.Skipable
 import io.github.woolph.gradle.dependencycheck.suppression.CheckSuppressionFileTask
 import io.github.woolph.gradle.dependencycheck.suppression.GenerateSuppressionFileTask
+import io.github.woolph.gradle.dependencycheck.suppression.PrintVulnerabilityCauseTask
 import io.github.woolph.gradle.dependencycheck.suppression.UpdateSuppressionFileTask
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
@@ -88,11 +89,16 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                     suppressionFile.convention(makeSibling(thisExtension.suppressionFile) { it.nameWithoutExtension + ".new." + it.extension })
                 }
 
+                val printVulnerabilityCause = tasks.create<PrintVulnerabilityCauseTask>("printVulnerabilityCause") {
+                }
+
                 val dependencyCheckAnalyze = tasks.named<org.owasp.dependencycheck.gradle.tasks.Analyze>("dependencyCheckAnalyze") {
                     onlyIf {
                         thisExtension.skip.map { !it }.get()
                     }
                     dependsOn(checkSuppressionFileTask)
+
+                    finalizedBy(printVulnerabilityCause)
                 }
 
                 check {
