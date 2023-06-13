@@ -49,15 +49,20 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
     /**
      * set of allowed licenses.
      * Defaults to setOf(
-     * "MIT License",
-     * "MIT-0",
-     * "Apache License, Version 2.0",
-     * "The 2-Clause BSD License",
-     * "The 3-Clause BSD License",
-     * "GNU GENERAL PUBLIC LICENSE, Version 2 + Classpath Exception",
-     * "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0",
-     * "Eclipse Public License - v 1.0",
-     * "PUBLIC DOMAIN")
+     *    "MIT License",
+     *    "MIT-0",
+     *    "Apache License, Version 2.0",
+     *    "BSD Zero Clause License",
+     *    "The 2-Clause BSD License",
+     *    "The 3-Clause BSD License",
+     *    "GNU GENERAL PUBLIC LICENSE, Version 2 + Classpath Exception",
+     *    "GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1",
+     *    "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0",
+     *    "Eclipse Public License - v 1.0",
+     *    "Eclipse Public License - v 2.0",
+     *    "PUBLIC DOMAIN",
+     *    "Bouncy Castle Licence", // is essentially the "MIT License"
+     *    )
      */
     // FIXME check whether GPL with CE, EPL-1.0, CC0, & all are really okay
     val allowedLicenses = project.objects.setProperty<String>().value(
@@ -69,7 +74,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
             "The 2-Clause BSD License",
             "The 3-Clause BSD License",
             "GNU GENERAL PUBLIC LICENSE, Version 2 + Classpath Exception",
-            "GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1"
+            "GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1",
             "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0",
             "Eclipse Public License - v 1.0",
             "Eclipse Public License - v 2.0",
@@ -78,7 +83,6 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
         ),
     )
 
-    // FIXME this DSL does not yet work properly for Groovy!!!!
     inner class WhiteListedDependenciesBuilder {
         val whiteListedDependencies = mutableMapOf<Regex, Instant>()
 
