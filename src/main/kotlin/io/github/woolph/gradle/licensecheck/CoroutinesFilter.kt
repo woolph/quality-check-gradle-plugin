@@ -23,7 +23,7 @@ internal class CoroutinesFilter : DependencyFilter {
                 ConfigurationData(
                     configurationData.name,
                     configurationData.dependencies.map { moduleData ->
-                        if (moduleData.group == "org.jetbrains.kotlinx" && moduleData.name == "kotlinx-coroutines-core" && moduleData.version == "1.6.4") {
+                        if (moduleData.group == "org.jetbrains.kotlinx" && moduleData.name == "kotlinx-coroutines-core") {
                             ModuleData(
                                 moduleData.group,
                                 moduleData.name,

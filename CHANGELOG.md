@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.4]() 2023-06-13
 ### Changed
 - Added EPLv2 & LGPL 2.1 to the license white list 
+- Removing version check for kotlinx-coroutines-core license fixer (somehow kotlinx-coroutines-core is missing the
+license information, so the quality check plugin provides it) 
+
+### Fixed
+- InputFile issue with PrintVulnerabilityCauseTask
 
 ## [1.2.3]() - 2023-05-22
 ### Added

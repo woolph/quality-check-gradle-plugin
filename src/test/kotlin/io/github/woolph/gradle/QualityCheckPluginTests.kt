@@ -20,7 +20,7 @@ class QualityCheckPluginTests {
         fun supportedGradleVersions(): Stream<String> = SUPPORTED_GRADLE_VERSIONS.stream()
 
         @JvmStatic
-        val SUPPORTED_GRADLE_VERSIONS = listOf("8.0.1", "7.6") // TODO consider supporting 6.9.4 as well (but Licensecheck plugin does need to be downgraded for this
+        val SUPPORTED_GRADLE_VERSIONS = listOf("8.1.1", "7.6.1") // TODO consider supporting 6.9.4 as well (but Licensecheck plugin does need to be downgraded for this
     }
 
     @TempDir
