@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - adding normalization for EPL v1.0 and MPL 2.0 like h2 defines them
 
+## [1.2.5]() 2023-06-15
+### Changed
+- Added LGPL 3.0, "Go License" and "Indiana University Extreme! Lab Software License" to the license white list
+
 ## [1.2.4]() 2023-06-13
 ### Changed
 - Added EPLv2 & LGPL 2.1 to the license white list 
