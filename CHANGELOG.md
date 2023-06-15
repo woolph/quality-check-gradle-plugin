@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased/Upcoming
+### Changed
+- Updated plugins
+    - com.github.jk1.dependency-license-report to 2.4 (formerly 2.1)
+    - org.sonarqube to 4.2.1.3168 (formerly 4.0.0.2929)
+### Fixed
+- adding normalization for EPL v1.0 and MPL 2.0 like h2 defines them
 
 ## [1.2.4]() 2023-06-13
 ### Changed

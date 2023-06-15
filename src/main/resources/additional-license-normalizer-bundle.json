@@ -3,10 +3,14 @@
  */
 {
   "bundles" : [
+    { "bundleName" : "EPL-1.0", "licenseName" : "Eclipse Public License - v 1.0", "licenseUrl" : "http://www.eclipse.org/legal/epl-v10.html" },
+    { "bundleName" : "MPL-2.0", "licenseName" : "Mozilla Public License, Version 2.0", "licenseUrl" : "https://www.mozilla.org/en-US/MPL/2.0" },
     { "bundleName" : "Antlr BSD-3-Clause", "licenseName" : "The 3-Clause BSD License", "licenseUrl" : "https://www.antlr.org/license.html" },
     { "bundleName" : "CDDL1", "licenseName" : "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0", "licenseUrl" : "https://oss.oracle.com/licenses/CDDL" }
   ],
   "transformationRules" : [
+    { "bundleName" : "EPL-1.0", "licenseNamePattern" : "EPL( |-)1\\.0" },
+    { "bundleName" : "MPL-2.0", "licenseNamePattern" : "MPL( |-)2\\.0" },
     { "bundleName" : "Antlr BSD-3-Clause", "licenseUrlPattern" : ".*(www\\.)?antlr\\.org/license\\.(html|htm)" },
     { "bundleName" : "CDDL1", "licenseUrlPattern" : ".*(www\\.)?opensource\\.org/licenses/cddl1\\.php" }
   ]

@@ -4,11 +4,11 @@ ktlint = "0.48.2"
 
 [libraries]
 dependencyCheck = "org.owasp:dependency-check-gradle:7.4.4"
-sonarQube = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.0.0.2929"
-licenseReport = "com.github.jk1:gradle-license-report:2.1"
+sonarQube = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.2.1.3168"
+licenseReport = "com.github.jk1:gradle-license-report:2.4"
 kotlinxDatetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.4.0"
-kotlinxSerialization-core = "org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.1"
-kotlinxSerialization-json = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1"
+kotlinxSerialization-core = "org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.1"
+kotlinxSerialization-json = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
 
 databaseDrivers-postgres = "org.postgresql:postgresql:42.4.0"
 databaseDrivers-mssql = "com.microsoft.sqlserver:mssql-jdbc:10.2.1.jre8"
@@ -17,5 +17,5 @@ test-junit-engine = "org.junit.jupiter:junit-jupiter-engine:5.9.2"
 test-junit-params = "org.junit.jupiter:junit-jupiter-params:5.9.2"
 
 [plugins]
-pluginPublish = "com.gradle.plugin-publish:1.1.0"
-spotless = "com.diffplug.spotless:6.15.0"
+pluginPublish = "com.gradle.plugin-publish:1.2.0"
+spotless = "com.diffplug.spotless:6.19.0"
