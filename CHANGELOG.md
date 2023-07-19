@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased/Upcoming
 
+## [1.2.6]() 2023-07-19
+### Fixed
+- fixing issue trying to access the sonar task in sub-projects, while the sonar plugins only registers it
+for the root-project
+
 ## [1.2.5]() 2023-06-15
 ### Changed
 - Added LGPL 3.0, "Go License" and "Indiana University Extreme! Lab Software License" to the license white list

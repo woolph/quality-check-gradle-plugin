@@ -46,11 +46,19 @@ abstract class SonarQubeExtension @Inject constructor(project: Project) : Skipab
 
                 plugins.apply("org.sonarqube")
 
-                val sonarqube = tasks.named<org.sonarqube.gradle.SonarTask>("sonar") {
+                val sonarTask = tasks.findByName("sonar") as? org.sonarqube.gradle.SonarTask
+                sonarTask?.apply {
                     onlyIf {
                         thisExtension.skip.map { !it }.get()
                     }
+                    dependsOn(jacocoTestReport)
                 }
+//                val sonarTask = tasks.getByName<org.sonarqube.gradle.SonarTask>("sonar") {
+//                    onlyIf {
+//                        thisExtension.skip.map { !it }.get()
+//                    }
+//                    dependsOn(jacocoTestReport)
+//                }
 
                 jacocoTestReport {
                     dependsOn(test)
@@ -61,13 +69,9 @@ abstract class SonarQubeExtension @Inject constructor(project: Project) : Skipab
                     }
                 }
 
-                sonarqube {
-                    dependsOn(jacocoTestReport)
-                }
-
                 check {
                     dependsOn(jacocoTestReport)
-                    dependsOn(sonarqube)
+                    sonarTask?.let { dependsOn(it) }
                 }
 
                 afterEvaluate {
@@ -89,7 +93,6 @@ abstract class SonarQubeExtension @Inject constructor(project: Project) : Skipab
                     }
                 }
             } catch (e: Exception) {
-                println(e)
                 logger.error("sonarqube will not be applied due to exception", e)
             }
         }

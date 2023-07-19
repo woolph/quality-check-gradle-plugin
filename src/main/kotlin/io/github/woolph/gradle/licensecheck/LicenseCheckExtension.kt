@@ -236,7 +236,6 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                     }
                 }
             } catch (e: Exception) {
-                println(e)
                 logger.error("licenseCheck will not be applied due to exception", e)
             }
         }

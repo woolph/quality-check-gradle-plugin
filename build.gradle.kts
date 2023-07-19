@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "io.github.woolph.quality-check"
-version = "1.2.5"
+version = "1.2.6"
 
 gradlePlugin {
     website.set("https://github.com/woolph/quality-check-gradle-plugin")

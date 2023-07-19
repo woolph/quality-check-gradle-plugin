@@ -158,7 +158,6 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                     }
                 }
             } catch (e: Exception) {
-                println(e)
                 logger.error("dependencyCheck will not be applied due to exception", e)
             }
         }
