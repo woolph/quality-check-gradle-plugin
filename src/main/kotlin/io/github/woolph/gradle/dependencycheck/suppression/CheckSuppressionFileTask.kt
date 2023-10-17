@@ -32,6 +32,8 @@ abstract class CheckSuppressionFileTask : DefaultTask() {
     abstract val falsePositivePattern: Property<Regex>
 
     init {
+        group = "verification/dependency-check"
+
         maxSuppressUntil.convention(ZonedDateTime.now().plusDays(365))
 
         falsePositivePattern.convention(Regex("false[\\s-_]positive", RegexOption.IGNORE_CASE))

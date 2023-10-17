@@ -28,6 +28,8 @@ abstract class UpdateSuppressionFileTask : DefaultTask() {
     abstract val desiredZoneId: Property<ZoneId>
 
     init {
+        group = "verification/dependency-check"
+
         suppressionFile.convention(
             project.layout.projectDirectory.file("dc-suppress-updated.xml"),
         )

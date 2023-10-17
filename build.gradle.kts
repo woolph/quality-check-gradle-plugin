@@ -65,12 +65,10 @@ tasks.withType<Test> {
 
 spotless {
     kotlin {
-        ktlint(libs.versions.ktlint.get())
+        ktfmt().dropboxStyle()
         licenseHeader("/* Copyright \$YEAR ENGEL Austria GmbH */")
     }
-    kotlinGradle {
-        ktlint(libs.versions.ktlint.get())
-    }
+    kotlinGradle { ktfmt().dropboxStyle() }
 }
 
 tasks.create("updateReadmeVersions") {

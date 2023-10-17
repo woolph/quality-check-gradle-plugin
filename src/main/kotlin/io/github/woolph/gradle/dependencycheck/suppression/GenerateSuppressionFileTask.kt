@@ -34,6 +34,8 @@ abstract class GenerateSuppressionFileTask : DefaultTask() {
     abstract val desiredZoneId: Property<ZoneId>
 
     init {
+        group = "verification/dependency-check"
+
         dependencyCheckXmlReport.convention(
             project.layout.buildDirectory.file("reports/dependency-check-junit.xml"),
         )
@@ -43,7 +45,8 @@ abstract class GenerateSuppressionFileTask : DefaultTask() {
         )
 
         suppressUntil.convention(
-            project.providers.gradleProperty("suppressUntil").map { SuppressionEntry.parseToZoneDateTime(it) },
+            project.providers.gradleProperty("suppressUntil").map { SuppressionEntry.parseToZoneDateTime(it) }
+                .orElse(ZonedDateTime.now().plusMonths(2).withDayOfMonth(1)),
         )
 
         desiredZoneId.convention(SuppressionEntry.DEFAULT_ZONE_ID)

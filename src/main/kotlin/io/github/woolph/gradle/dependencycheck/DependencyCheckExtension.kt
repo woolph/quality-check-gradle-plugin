@@ -36,6 +36,12 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
         .convention(0.0)
 
     /**
+     * defines whether the cause of a vulnerability should be printed to the console.
+     */
+    val printVulnerabilityCauseEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
+        .convention(true)
+
+    /**
      * location of the dependencyCheck suppression file.
      * Defaults to "$projectDir/dependency-check-suppression.xml"
      */
@@ -90,9 +96,21 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                 }
 
                 val printVulnerabilityCause = tasks.create<PrintVulnerabilityCauseTask>("printVulnerabilityCause") {
+                    onlyIf("printVulnerabilityCauseEnabled is true") { thisExtension.printVulnerabilityCauseEnabled.get() }
+                }
+
+                listOf(
+                    "dependencyCheckAggregate",
+                    "dependencyCheckPurge",
+                    "dependencyCheckUpdate",
+                ).forEach { taskName ->
+                    tasks.named(taskName) {
+                        group = "verification/dependency-check"
+                    }
                 }
 
                 val dependencyCheckAnalyze = tasks.named<org.owasp.dependencycheck.gradle.tasks.Analyze>("dependencyCheckAnalyze") {
+                    group = "verification/dependency-check"
                     onlyIf {
                         thisExtension.skip.map { !it }.get()
                     }

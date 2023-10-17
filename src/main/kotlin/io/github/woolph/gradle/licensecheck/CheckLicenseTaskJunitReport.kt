@@ -35,7 +35,7 @@ abstract class CheckLicenseTaskJunitReport : DefaultTask() {
     abstract val licenseCheckReport: RegularFileProperty
 
     init {
-        group = "verification"
+        group = "verification/license-check"
         description = "Check if License could be used"
 
         tmpDirectory.convention(project.layout.buildDirectory.dir("tmp/license-check"))

@@ -10,6 +10,11 @@ abstract class CreateLicenseBundleNormalizerConfigTask : DefaultTask() {
     @get:OutputFile
     abstract val additonalLicenseNormalizerBundle: RegularFileProperty
 
+    init {
+        group = "verification/license-check"
+        description = "Create License Bundle Normalizer Config Task"
+    }
+
     @TaskAction
     fun createLicenseBundleNormalizerConfigTask() {
         CreateLicenseBundleNormalizerConfigTask::class.java.getResourceAsStream("/additional-license-normalizer-bundle.json")

@@ -137,6 +137,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                 plugins.apply("com.github.jk1.dependency-license-report")
 
                 tasks.named<com.github.jk1.license.task.CheckLicensePreparationTask>("checkLicensePreparation") {
+                    group = "verification/license-check"
                     onlyIf { false } // skip this task cause it only adds a renderer
                 }
 
@@ -145,6 +146,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                 }
 
                 val generateLicenseReport = tasks.named<com.github.jk1.license.task.ReportTask>("generateLicenseReport") {
+                    group = "verification/license-check"
                     inputs.property("ownedDependencies", thisExtension.ownedDependencies)
                     inputs.property(
                         "whiteListedDependencies",
@@ -155,6 +157,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
 
                 val checkLicense = tasks.create<CheckLicenseTaskJunitReport>("checkLicenses") {
 //                val checkLicense = tasks.replace<CheckLicenseTaskJunitReport>("checkLicense", CheckLicenseTaskJunitReport::class.java) {
+
                     allowedLicenses.set(thisExtension.allowedLicenses)
                     licenseCheckReport.set(thisExtension.reportsDirectory.file("license-check-report.xml"))
                     projectDependenciesData.set(thisExtension.reportsDirectory.file(CheckLicenseTaskJunitReport.PROJECT_JSON_FOR_LICENSE_CHECKING_FILE))
@@ -165,6 +168,11 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                     }
 
                     dependsOn(generateLicenseReport)
+                }
+
+                tasks.named("checkLicense") {
+                    group = "verification/license-check"
+                    description = "task from license-check plugin (but it is replaced by checkLicenses)"
                 }
 
                 check {
