@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased/Upcoming
 
+## [1.2.7]() 2023-10-19
+### Changed
+- make printVulnerabilityCauseTask skipable cause it runs into Java 
+
 ## [1.2.6]() 2023-07-19
 ### Fixed
 - fixing issue trying to access the sonar task in sub-projects, while the sonar plugins only registers it

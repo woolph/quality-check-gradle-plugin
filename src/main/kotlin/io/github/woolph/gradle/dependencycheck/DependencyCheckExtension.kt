@@ -39,7 +39,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
      * defines whether the cause of a vulnerability should be printed to the console.
      */
     val printVulnerabilityCauseEnabled: Property<Boolean> = project.objects.property(Boolean::class.java)
-        .convention(true)
+        .convention(false)
 
     /**
      * location of the dependencyCheck suppression file.
@@ -60,7 +60,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
         }
 
         internal fun Project.makeSibling(file: RegularFileProperty, fileNamePattern: (File) -> String): Provider<RegularFile> =
-            getParentDirectoryOf(file).zip(file) { parent, file -> parent.file(fileNamePattern(file.asFile)) }
+            getParentDirectoryOf(file).zip(file) { parent, actualFile -> parent.file(fileNamePattern(actualFile.asFile)) }
 
         internal fun <T> Provider<T>.filter(predicate: (T) -> Boolean): Provider<T> = flatMap {
             if (predicate(it)) {

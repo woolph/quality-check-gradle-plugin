@@ -9,14 +9,14 @@ Add the plugin with the id `io.github.woolph.quality-check` to your gradle build
 >####Kotlin DSL Sample *build.gradle.kts*
 >```kotlin
 >plugins {
->    id("io.github.woolph.quality-check") version "1.2.5"
+>    id("io.github.woolph.quality-check") version "1.2.7"
 >}
 >```
 
 >####Groovy DSL Sample *build.gradle*
 >```groovy
 >plugins {
->    id 'io.github.woolph.quality-check' version '1.2.5'
+>    id 'io.github.woolph.quality-check' version '1.2.7'
 >}
 >```
 
@@ -24,8 +24,8 @@ Add the plugin with the id `io.github.woolph.quality-check` to your gradle build
 The quality check adds several other plugins to your gradle build with the intent to ensure code quality and code 
 security. More precisely, it adds the following plugins:
 * `org.owasp:dependency-check-gradle:7.4.4` which checks your 3rd party dependencies for known vulnerabilities
-* `org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.2.1.3168` which contacts a sonarQube server to do code analysis
-* `com.github.jk1:gradle-license-report:2.4` which checks the licenses of your 3rd party dependencies
+* `org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.4.1.3373` which contacts a sonarQube server to do code analysis
+* `com.github.jk1:gradle-license-report:2.5` which checks the licenses of your 3rd party dependencies
 
 Your gradle build is automatically configured in a way that the `check` of your build depends upon 
 all the relevant tasks introduced by these plugins. Here is what it would look like, if you'd have to do this
