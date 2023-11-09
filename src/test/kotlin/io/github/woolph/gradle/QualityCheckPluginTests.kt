@@ -1,6 +1,8 @@
 /* Copyright 2023 ENGEL Austria GmbH */
 package io.github.woolph.gradle
 
+import java.io.File
+import java.util.stream.Stream
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -11,8 +13,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import java.io.File
-import java.util.stream.Stream
 
 class QualityCheckPluginTests {
     companion object {
@@ -20,11 +20,14 @@ class QualityCheckPluginTests {
         fun supportedGradleVersions(): Stream<String> = SUPPORTED_GRADLE_VERSIONS.stream()
 
         @JvmStatic
-        val SUPPORTED_GRADLE_VERSIONS = listOf("8.1.1", "7.6.1") // TODO consider supporting 6.9.4 as well (but Licensecheck plugin does need to be downgraded for this
+        val SUPPORTED_GRADLE_VERSIONS =
+            listOf(
+                "8.1.1",
+                "7.6.1") // TODO consider supporting 6.9.4 as well (but Licensecheck plugin does
+        // need to be downgraded for this
     }
 
-    @TempDir
-    lateinit var testProjectDir: File
+    @TempDir lateinit var testProjectDir: File
     lateinit var settingsFile: File
     lateinit var buildFile: File
 
@@ -40,7 +43,8 @@ class QualityCheckPluginTests {
         settingsFile.writeText(
             """
             rootProject.name = 'dependency-check-skip'
-            """.trimIndent(),
+            """
+                .trimIndent(),
         )
         buildFile.writeText(
             """
@@ -61,15 +65,17 @@ class QualityCheckPluginTests {
                     skip = true
                 }
             }
-            """.trimIndent(),
+            """
+                .trimIndent(),
         )
 
-        val result: BuildResult = GradleRunner.create()
-            .withGradleVersion(gradleVersion)
-            .withProjectDir(testProjectDir)
-            .withArguments("build")
-            .withPluginClasspath()
-            .build()
+        val result: BuildResult =
+            GradleRunner.create()
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(testProjectDir)
+                .withArguments("build")
+                .withPluginClasspath()
+                .build()
 
         assertTrue(result.output.contains("licenseCheck will not be applied due to exception"))
         assertTrue(result.output.contains("dependencyCheck will not be applied due to exception"))
@@ -82,7 +88,8 @@ class QualityCheckPluginTests {
         settingsFile.writeText(
             """
             rootProject.name = 'dependency-check-skip'
-            """.trimIndent(),
+            """
+                .trimIndent(),
         )
         buildFile.writeText(
             """
@@ -104,15 +111,17 @@ class QualityCheckPluginTests {
                     skip = true
                 }
             }
-            """.trimIndent(),
+            """
+                .trimIndent(),
         )
 
-        val result: BuildResult = GradleRunner.create()
-            .withGradleVersion(gradleVersion)
-            .withProjectDir(testProjectDir)
-            .withArguments("check")
-            .withPluginClasspath()
-            .build()
+        val result: BuildResult =
+            GradleRunner.create()
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(testProjectDir)
+                .withArguments("check")
+                .withPluginClasspath()
+                .build()
 
         assertTrue(result.output.contains("licenseCheck is disabled!"))
         assertTrue(result.output.contains("dependencyCheck is disabled!"))
@@ -134,7 +143,8 @@ class QualityCheckPluginTests {
         settingsFile.writeText(
             """
             rootProject.name = 'dependency-check-skip'
-            """.trimIndent(),
+            """
+                .trimIndent(),
         )
         buildFile.writeText(
             """
@@ -150,18 +160,22 @@ class QualityCheckPluginTests {
                     skip = true
                 }
             }
-            """.trimIndent(),
+            """
+                .trimIndent(),
         )
 
-        val result: BuildResult = GradleRunner.create()
-            .withGradleVersion(gradleVersion)
-            .withProjectDir(testProjectDir)
-            .withArguments("check", "--stacktrace", "-Psonarqube.edition=community")
-            .withEnvironment(mapOf("BUILD_REASON" to "Scheduled"))
-            .withPluginClasspath()
-            .buildAndFail()
+        val result: BuildResult =
+            GradleRunner.create()
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(testProjectDir)
+                .withArguments("check", "--stacktrace", "-Psonarqube.edition=community")
+                .withEnvironment(mapOf("BUILD_REASON" to "Scheduled"))
+                .withPluginClasspath()
+                .buildAndFail()
 
-        assertFalse(result.output.contains("sonarqube is running on Community Edition and build reason is PullRequest => skipping sonarqube!"))
+        assertFalse(
+            result.output.contains(
+                "sonarqube is running on Community Edition and build reason is PullRequest => skipping sonarqube!"))
 
         assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
         assertEquals(TaskOutcome.FAILED, result.task(":sonar")?.outcome)
@@ -175,7 +189,8 @@ class QualityCheckPluginTests {
         settingsFile.writeText(
             """
             rootProject.name = 'dependency-check-skip'
-            """.trimIndent(),
+            """
+                .trimIndent(),
         )
         buildFile.writeText(
             """
@@ -191,18 +206,22 @@ class QualityCheckPluginTests {
                     skip = true
                 }
             }
-            """.trimIndent(),
+            """
+                .trimIndent(),
         )
 
-        val result: BuildResult = GradleRunner.create()
-            .withGradleVersion(gradleVersion)
-            .withProjectDir(testProjectDir)
-            .withArguments("check", "--stacktrace", "-Psonarqube.edition=community")
-            .withEnvironment(mapOf("BUILD_REASON" to "PullRequest"))
-            .withPluginClasspath()
-            .build()
+        val result: BuildResult =
+            GradleRunner.create()
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(testProjectDir)
+                .withArguments("check", "--stacktrace", "-Psonarqube.edition=community")
+                .withEnvironment(mapOf("BUILD_REASON" to "PullRequest"))
+                .withPluginClasspath()
+                .build()
 
-        assertTrue(result.output.contains("sonarqube is running on Community Edition and build reason is PullRequest => skipping sonarqube!"))
+        assertTrue(
+            result.output.contains(
+                "sonarqube is running on Community Edition and build reason is PullRequest => skipping sonarqube!"))
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":check")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
@@ -219,7 +238,8 @@ class QualityCheckPluginTests {
         settingsFile.writeText(
             """
             rootProject.name = 'licenseCheckOnly'
-            """.trimIndent(),
+            """
+                .trimIndent(),
         )
         buildFile.writeText(
             """
@@ -246,15 +266,17 @@ class QualityCheckPluginTests {
                     skip = true
                 }
             }
-            """.trimIndent(),
+            """
+                .trimIndent(),
         )
 
-        val result: BuildResult = GradleRunner.create()
-            .withGradleVersion(gradleVersion)
-            .withProjectDir(testProjectDir)
-            .withArguments("check")
-            .withPluginClasspath()
-            .build()
+        val result: BuildResult =
+            GradleRunner.create()
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(testProjectDir)
+                .withArguments("check")
+                .withPluginClasspath()
+                .build()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":check")?.outcome)
         assertEquals(TaskOutcome.SUCCESS, result.task(":checkLicenses")?.outcome)
@@ -272,7 +294,8 @@ class QualityCheckPluginTests {
         settingsFile.writeText(
             """
             rootProject.name = 'licenseCheckOnly'
-            """.trimIndent(),
+            """
+                .trimIndent(),
         )
         buildFile.writeText(
             """
@@ -302,15 +325,17 @@ class QualityCheckPluginTests {
                     allowedLicenses = ["MIT-0"]
                 }
             }
-            """.trimIndent(),
+            """
+                .trimIndent(),
         )
 
-        val result: BuildResult = GradleRunner.create()
-            .withGradleVersion(gradleVersion)
-            .withProjectDir(testProjectDir)
-            .withArguments("check")
-            .withPluginClasspath()
-            .buildAndFail()
+        val result: BuildResult =
+            GradleRunner.create()
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(testProjectDir)
+                .withArguments("check")
+                .withPluginClasspath()
+                .buildAndFail()
 
         assertEquals(TaskOutcome.FAILED, result.task(":checkLicenses")?.outcome)
     }

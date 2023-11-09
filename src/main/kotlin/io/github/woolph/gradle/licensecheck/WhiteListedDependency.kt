@@ -12,5 +12,6 @@ data class WhiteListedDependency(
 
     fun isExpired(clock: Clock) = !isValid(clock)
 
-    override fun toString() = "WhiteListedDependency(moduleNamePattern=$moduleNamePattern, validUntil=$validUntil)"
+    override fun toString() =
+        "WhiteListedDependency(moduleNamePattern=$moduleNamePattern, validUntil=$validUntil)"
 }

@@ -9,14 +9,14 @@ Add the plugin with the id `io.github.woolph.quality-check` to your gradle build
 >####Kotlin DSL Sample *build.gradle.kts*
 >```kotlin
 >plugins {
->    id("io.github.woolph.quality-check") version "1.2.7"
+>    id("io.github.woolph.quality-check") version "1.2.8"
 >}
 >```
 
 >####Groovy DSL Sample *build.gradle*
 >```groovy
 >plugins {
->    id 'io.github.woolph.quality-check' version '1.2.7'
+>    id 'io.github.woolph.quality-check' version '1.2.8'
 >}
 >```
 

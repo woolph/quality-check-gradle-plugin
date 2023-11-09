@@ -17,11 +17,12 @@ class QualityCheckPlugin : Plugin<Project> {
     private lateinit var dependencyCheckExtension: DependencyCheckExtension
     private lateinit var sonarqubeExtension: SonarQubeExtension
 
-    override fun apply(project: Project): Unit = project.run {
-        qualityCheckExtension = extensions.create("qualityCheck", QualityCheckExtension::class)
+    override fun apply(project: Project): Unit =
+        project.run {
+            qualityCheckExtension = extensions.create("qualityCheck", QualityCheckExtension::class)
 
-        applyDependencyCheckExtension(qualityCheckExtension as ExtensionAware)
-        applySonarQubeExtension(qualityCheckExtension as ExtensionAware)
-        applyLicenseCheckExtension(qualityCheckExtension as ExtensionAware)
-    }
+            applyDependencyCheckExtension(qualityCheckExtension as ExtensionAware)
+            applySonarQubeExtension(qualityCheckExtension as ExtensionAware)
+            applyLicenseCheckExtension(qualityCheckExtension as ExtensionAware)
+        }
 }

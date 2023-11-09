@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "io.github.woolph.quality-check"
-version = "1.2.7"
+version = "1.2.8"
 
 gradlePlugin {
     website.set("https://github.com/woolph/quality-check-gradle-plugin")
@@ -43,25 +43,21 @@ dependencies {
     runtimeOnly(libs.databaseDrivers.postgres)
     runtimeOnly(libs.databaseDrivers.mssql)
 
-    //region unit test dependencies
+    // region unit test dependencies
     testImplementation(gradleTestKit())
     testImplementation(libs.test.junit.params)
     testRuntimeOnly(libs.test.junit.engine)
-    //endregion
+    // endregion
 }
 
-kotlin {
-    jvmToolchain(libs.versions.jvmTarget.map { it.toInt() }.get())
-}
+kotlin { jvmToolchain(libs.versions.jvmTarget.map { it.toInt() }.get()) }
 
 java {
     withSourcesJar()
     withJavadocJar()
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
+tasks.withType<Test> { useJUnitPlatform() }
 
 spotless {
     kotlin {
@@ -83,26 +79,39 @@ tasks.create("updateReadmeVersions") {
 
         val versionPatternString = "\\d+(\\.\\w+)*(-\\w+(\\.\\w+)*)?"
         val versionPattern = Regex("(?<=:)$versionPatternString")
-        val replacements = concat(
-            project.extensions.findByType<GradlePluginDevelopmentExtension>()?.let {
-                it.plugins.asSequence().flatMap { plugin ->
-                    sequenceOf(
-                        Regex("id\\(\"${Regex.escape(plugin.id)}\"\\) version \"$versionPatternString\"") to "id(\"${plugin.id}\") version \"$version\"",
-                        Regex("id '${Regex.escape(plugin.id)}' version '$versionPatternString'") to "id '${plugin.id}' version '$version'",
-                    )
-                }
-            } ?: emptySequence(),
-            project.extensions.findByName("libs")?.let { libs ->
-                libs.libSequence()
-                    .map { it.toString() }.map { dependencyString ->
-                        val dependencyStringWithoutVersion = dependencyString.replace(versionPattern, "")
-                        Regex("${Regex.escape(dependencyStringWithoutVersion)}($versionPatternString)?") to dependencyString
+        val replacements =
+            concat(
+                project.extensions.findByType<GradlePluginDevelopmentExtension>()?.let {
+                    it.plugins.asSequence().flatMap { plugin ->
+                        sequenceOf(
+                            Regex(
+                                "id\\(\"${Regex.escape(plugin.id)}\"\\) version \"$versionPatternString\"") to
+                                "id(\"${plugin.id}\") version \"$version\"",
+                            Regex(
+                                "id '${Regex.escape(plugin.id)}' version '$versionPatternString'") to
+                                "id '${plugin.id}' version '$version'",
+                        )
                     }
-            } ?: emptySequence(),
-        )
+                }
+                    ?: emptySequence(),
+                project.extensions.findByName("libs")?.let { libs ->
+                    libs
+                        .libSequence()
+                        .map { it.toString() }
+                        .map { dependencyString ->
+                            val dependencyStringWithoutVersion =
+                                dependencyString.replace(versionPattern, "")
+                            Regex(
+                                "${Regex.escape(dependencyStringWithoutVersion)}($versionPatternString)?") to
+                                dependencyString
+                        }
+                }
+                    ?: emptySequence(),
+            )
 
         readmeFile.asFile.writeText(
-            replacements.onEach { println(it) }
+            replacements
+                .onEach { println(it) }
                 .fold(readmeContent) { currentReadmeContent, (pattern, replacement) ->
                     currentReadmeContent.replace(pattern, replacement)
                 },
@@ -113,18 +122,24 @@ tasks.create("updateReadmeVersions") {
 fun <T> concat(vararg sequences: Sequence<T>): Sequence<T> = sequenceOf(*sequences).flatMap { it }
 
 val providerType = Provider::class.createType(listOf(KTypeProjection.STAR))
-val subDependencyFactoryType = org.gradle.api.internal.catalog.AbstractExternalDependencyFactory.SubDependencyFactory::class.createType()
+val subDependencyFactoryType =
+    org.gradle.api.internal.catalog.AbstractExternalDependencyFactory.SubDependencyFactory::class
+        .createType()
 
 fun Any.libSequence(): Sequence<MinimalExternalModuleDependency> {
     val memberFunctions = this::class.memberFunctions
 
     return concat(
-        memberFunctions.asSequence()
+        memberFunctions
+            .asSequence()
             .filter { it.parameters.size == 1 && it.returnType.isSubtypeOf(providerType) }
             .map { (it.call(this) as Provider<*>).get() }
             .filterIsInstance<MinimalExternalModuleDependency>(),
-        memberFunctions.asSequence()
-            .filter { it.parameters.size == 1 && it.returnType.isSubtypeOf(subDependencyFactoryType) }
+        memberFunctions
+            .asSequence()
+            .filter {
+                it.parameters.size == 1 && it.returnType.isSubtypeOf(subDependencyFactoryType)
+            }
             .flatMap { it.call(this)?.libSequence() ?: emptySequence() },
     )
 }

@@ -7,6 +7,7 @@ enum class SonarQubeEdition {
     DEVELOPER,
     ENTERPRISE,
     ;
+
     companion object {
         fun of(string: String?): SonarQubeEdition? =
             values().asSequence().firstOrNull { it.name.equals(string, true) }
