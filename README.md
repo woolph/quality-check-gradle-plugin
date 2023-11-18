@@ -60,7 +60,7 @@ application,
 the expiration date disables the suppression entry, forcing you to reevaluate the vulnerability. Therefore, this expiring 
 suppression may be useful for vulnerabilities that, for some reason, cannot be fixed right away.
 
-##### Generate a suppression file from
+##### Generate a suppression file
 There is also a task which allows you to generate a new suppression file containing all the suppression entries of the 
 original file which are still necessary (suppression entries which aren't needed anymore are removed) adding new 
 suppression entries for each vulnerability found in the dependencyCheck report (so, please make sure to perform the 
@@ -68,6 +68,13 @@ suppression entries for each vulnerability found in the dependencyCheck report (
 
 ````shell
 gradlew generateSuppressionFile -PsuppressUntil=2023-04-01
+````
+
+##### Show vulnerabilities in dependency tree
+The following command can be used to highlight all dependencies in the dependency tree for which there is 
+currently an entry in the suppression file:
+````shell
+gradlew dependencies --configuration runtimeClasspath | grep --color=auto -E "$(cat dependency-check-suppression.xml | grep '<packageUrl>' | sed 's_.*pkg:maven/\(.*\)/\(.*\)@.*_\1:\2_' | sort -u | tr '\n' '|')\$"
 ````
 
 #### Using a mirror database
