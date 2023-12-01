@@ -22,8 +22,10 @@ class QualityCheckPluginTests {
         @JvmStatic
         val SUPPORTED_GRADLE_VERSIONS =
             listOf(
+                "8.5",
                 "8.1.1",
-                "7.6.1") // TODO consider supporting 6.9.4 as well (but Licensecheck plugin does
+                "7.6.1",
+            ) // TODO consider supporting 6.9.4 as well (but Licensecheck plugin does
         // need to be downgraded for this
     }
 
