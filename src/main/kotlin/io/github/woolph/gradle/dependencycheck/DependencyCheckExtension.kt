@@ -75,7 +75,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                 parent.file(fileNamePattern(actualFile.asFile))
             }
 
-        internal fun <T> Provider<T>.filter(predicate: (T) -> Boolean): Provider<T> = flatMap {
+        internal fun <T> Provider<T>.filter2(predicate: (T) -> Boolean): Provider<T> = flatMap {
             if (predicate(it)) {
                 this
             } else {
@@ -83,7 +83,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
             }
         }
 
-        internal fun Provider<RegularFile>.filterExists(): Provider<RegularFile> = filter {
+        internal fun Provider<RegularFile>.filterExists(): Provider<RegularFile> = filter2 {
             it.asFile.exists()
         }
 
@@ -161,9 +161,8 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                             failBuildOnCVSS = thisExtension.cvssThreshold.get().toFloat()
                             formats =
                                 listOf(
-                                    org.owasp.dependencycheck.reporting.ReportGenerator.Format.HTML,
-                                    org.owasp.dependencycheck.reporting.ReportGenerator.Format
-                                        .JUNIT,
+                                    "HTML",
+                                    "JUNIT",
                                 )
                             if (thisExtension.suppressionFile.get().asFile.exists()) {
                                 logger.warn(

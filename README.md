@@ -9,23 +9,22 @@ Add the plugin with the id `io.github.woolph.quality-check` to your gradle build
 >####Kotlin DSL Sample *build.gradle.kts*
 >```kotlin
 >plugins {
->    id("io.github.woolph.quality-check") version "1.2.8"
+>    id("io.github.woolph.quality-check") version "2.0.0"
 >}
 >```
 
 >####Groovy DSL Sample *build.gradle*
 >```groovy
 >plugins {
->    id 'io.github.woolph.quality-check' version '1.2.8'
+>    id 'io.github.woolph.quality-check' version '2.0.0'
 >}
 >```
 
 ## What does it do?
 The quality check adds several other plugins to your gradle build with the intent to ensure code quality and code 
 security. More precisely, it adds the following plugins:
-* `org.owasp:dependency-check-gradle:7.4.4` which checks your 3rd party dependencies for known vulnerabilities
-* `org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.4.1.3373` which contacts a sonarQube server to do code analysis
-* `com.github.jk1:gradle-license-report:2.5` which checks the licenses of your 3rd party dependencies
+* `org.owasp:dependency-check-gradle:9.1.0` which checks your 3rd party dependencies for known vulnerabilities
+* `com.github.jk1:gradle-license-report:2.7` which checks the licenses of your 3rd party dependencies
 
 Your gradle build is automatically configured in a way that the `check` of your build depends upon 
 all the relevant tasks introduced by these plugins. Here is what it would look like, if you'd have to do this
@@ -35,7 +34,6 @@ explicitly (but you DON'T have to do that, 'cause it is already setup this way!)
 tasks.check {
     dependsOn(
         tasks.dependencyCheckAnalyze,
-        tasks.sonar,
         tasks.checkLicense,
     )
 }
@@ -90,16 +88,11 @@ anew), by providing a database for the plugin to be used. You can do so by setti
 * `DEPENDENCY_CHECK_DB_DRIVER` is the full-qualified name of the jdbc driver (the following drivers are readily 
 available in the classpath of this gradle plugin:)
   * `org.postgresql.Driver` (from `org.postgresql:postgresql:42.4.0`)
-  * `com.microsoft.sqlserver.jdbc.SQLServerDriver` (from `com.microsoft.sqlserver:mssql-jdbc:10.2.1.jre8`)
+  * `com.microsoft.sqlserver.jdbc.SQLServerDriver` (from `com.microsoft.sqlserver:mssql-jdbc:12.2.0.jre11`)
 * `DEPENDENCY_CHECK_DB_CONNECTION` is a jdbc string for accessing the database
 * `DEPENDENCY_CHECK_DB_USER`
 * `DEPENDENCY_CHECK_DB_PASSWORD`
 
-TBD
-By default, the dependencyCheckAnalyze 
-
-### Sonarqube
-TBD
 
 ### License Report
 In software projects, you may want to take a close look on the licenses of your 3rd party dependencies, because some of 

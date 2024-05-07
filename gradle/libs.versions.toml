@@ -2,19 +2,18 @@
 jvmTarget = "11"
 
 [libraries]
-dependencyCheck = "org.owasp:dependency-check-gradle:7.4.4"
-sonarQube = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.4.1.3373"
-licenseReport = "com.github.jk1:gradle-license-report:2.5"
-kotlinxDatetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.4.1"
-kotlinxSerialization-core = "org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0"
-kotlinxSerialization-json = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0"
+dependencyCheck = "org.owasp:dependency-check-gradle:9.1.0"
+licenseReport = "com.github.jk1:gradle-license-report:2.7"
+kotlinxDatetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.5.0"
+kotlinxSerialization-core = "org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3"
+kotlinxSerialization-json = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
 
 databaseDrivers-postgres = "org.postgresql:postgresql:42.4.0"
-databaseDrivers-mssql = "com.microsoft.sqlserver:mssql-jdbc:10.2.1.jre8"
+databaseDrivers-mssql = "com.microsoft.sqlserver:mssql-jdbc:12.2.0.jre11"
 
-test-junit-engine = "org.junit.jupiter:junit-jupiter-engine:5.10.0"
-test-junit-params = "org.junit.jupiter:junit-jupiter-params:5.10.0"
+test-junit-engine = "org.junit.jupiter:junit-jupiter-engine:5.10.2"
+test-junit-params = "org.junit.jupiter:junit-jupiter-params:5.10.2"
 
 [plugins]
 pluginPublish = "com.gradle.plugin-publish:1.2.1"
-spotless = "com.diffplug.spotless:6.22.0"
+spotless = "com.diffplug.spotless:6.25.0"

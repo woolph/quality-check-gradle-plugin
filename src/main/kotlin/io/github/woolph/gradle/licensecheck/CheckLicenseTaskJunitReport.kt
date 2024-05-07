@@ -67,11 +67,10 @@ abstract class CheckLicenseTaskJunitReport : DefaultTask() {
                     checkResult,
                 )
         } finally {
-            val modulesWithUnallowedLicenses =
+            val modulesWithDisallowedLicenses =
                 (Json.parseToJsonElement(checkResult.readText())
                         .jsonObject["dependenciesWithoutAllowedLicenses"]
-                        ?.jsonArray
-                        ?: emptyList())
+                        ?.jsonArray ?: emptyList())
                     .map {
                         val module = "${it.jsonObject["moduleName"]?.jsonPrimitive?.content}"
                         val license = "${it.jsonObject["moduleLicense"]?.jsonPrimitive?.content}"
@@ -79,7 +78,7 @@ abstract class CheckLicenseTaskJunitReport : DefaultTask() {
                     }
                     .groupBy(Pair<String, String>::first, Pair<String, String>::second)
 
-            modulesWithUnallowedLicenses.forEach { module, licenses ->
+            modulesWithDisallowedLicenses.forEach { (module, licenses) ->
                 logger.error(
                     "licenses of the module $module are not allowed (licenses are $licenses)")
             }
@@ -90,7 +89,7 @@ abstract class CheckLicenseTaskJunitReport : DefaultTask() {
                     buildString {
                         appendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
                         appendLine("<testsuites>")
-                        modulesWithUnallowedLicenses.forEach { module, licenses ->
+                        modulesWithDisallowedLicenses.forEach { (module, licenses) ->
                             appendLine(
                                 "<testsuite name=\"$module\" tests=\"1\" skipped=\"0\" failures=\"1\">" +
                                     "<testcase name=\"$module\" classname=\"license-check\"><failure message=\"none of the following licenses is allowed $licenses\" /></testcase></testsuite>",

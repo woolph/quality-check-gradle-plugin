@@ -9,11 +9,12 @@ plugins {
     alias(libs.plugins.pluginPublish)
 
     alias(libs.plugins.spotless)
+    //    kotlin("jvm")
 }
 
 group = "io.github.woolph.quality-check"
 
-version = "1.3.0"
+version = "2.0.0"
 
 gradlePlugin {
     website.set("https://github.com/woolph/quality-check-gradle-plugin")
@@ -23,7 +24,7 @@ gradlePlugin {
             id = "io.github.woolph.quality-check"
             implementationClass = "io.github.woolph.gradle.QualityCheckPlugin"
             displayName = "ENGEL Quality Check"
-            description = "Adds dependency check, license check, and sonarqube to your build."
+            description = "Adds dependency check and license check to your build."
             tags.set(listOf("code quality", "security"))
         }
     }
@@ -36,7 +37,6 @@ repositories {
 
 dependencies {
     implementation(libs.dependencyCheck)
-    implementation(libs.sonarQube)
     implementation(libs.licenseReport)
     implementation(libs.kotlinxDatetime)
     implementation(libs.kotlinxSerialization.json)
@@ -49,6 +49,7 @@ dependencies {
     testImplementation(libs.test.junit.params)
     testRuntimeOnly(libs.test.junit.engine)
     // endregion
+    //    implementation(kotlin("stdlib-jdk8"))
 }
 
 kotlin { jvmToolchain(libs.versions.jvmTarget.map { it.toInt() }.get()) }
@@ -93,8 +94,7 @@ tasks.create("updateReadmeVersions") {
                                 "id '${plugin.id}' version '$version'",
                         )
                     }
-                }
-                    ?: emptySequence(),
+                } ?: emptySequence(),
                 project.extensions.findByName("libs")?.let { libs ->
                     libs
                         .libSequence()
@@ -106,8 +106,7 @@ tasks.create("updateReadmeVersions") {
                                 "${Regex.escape(dependencyStringWithoutVersion)}($versionPatternString)?") to
                                 dependencyString
                         }
-                }
-                    ?: emptySequence(),
+                } ?: emptySequence(),
             )
 
         readmeFile.asFile.writeText(
