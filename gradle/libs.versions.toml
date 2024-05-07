@@ -9,7 +9,7 @@ kotlinxSerialization-core = "org.jetbrains.kotlinx:kotlinx-serialization-core:1.
 kotlinxSerialization-json = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
 
 databaseDrivers-postgres = "org.postgresql:postgresql:42.4.0"
-databaseDrivers-mssql = "com.microsoft.sqlserver:mssql-jdbc:10.2.1.jre8"
+databaseDrivers-mssql = "com.microsoft.sqlserver:mssql-jdbc:12.2.0.jre11"
 
 test-junit-engine = "org.junit.jupiter:junit-jupiter-engine:5.10.2"
 test-junit-params = "org.junit.jupiter:junit-jupiter-params:5.10.2"

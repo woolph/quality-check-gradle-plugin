@@ -81,7 +81,7 @@ anew), by providing a database for the plugin to be used. You can do so by setti
 * `DEPENDENCY_CHECK_DB_DRIVER` is the full-qualified name of the jdbc driver (the following drivers are readily 
 available in the classpath of this gradle plugin:)
   * `org.postgresql.Driver` (from `org.postgresql:postgresql:42.4.0`)
-  * `com.microsoft.sqlserver.jdbc.SQLServerDriver` (from `com.microsoft.sqlserver:mssql-jdbc:10.2.1.jre8`)
+  * `com.microsoft.sqlserver.jdbc.SQLServerDriver` (from `com.microsoft.sqlserver:mssql-jdbc:12.2.0.jre11`)
 * `DEPENDENCY_CHECK_DB_CONNECTION` is a jdbc string for accessing the database
 * `DEPENDENCY_CHECK_DB_USER`
 * `DEPENDENCY_CHECK_DB_PASSWORD`
