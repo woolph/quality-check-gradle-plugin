@@ -58,9 +58,6 @@ class DependencyCheckTests {
                 dependencyCheck {
                     skip = true
                 }
-                sonarQube {
-                    skip = true
-                }
                 licenseCheck {
                     skip = true
                 }
@@ -82,10 +79,7 @@ class DependencyCheckTests {
         assertEquals(TaskOutcome.UP_TO_DATE, result.task(":check")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":sonar")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":jacocoTestReport")?.outcome)
         assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
-        println(result.task(":jacocoTestReport")?.path)
         println(result.task(":dependencyCheckAnalyze")?.path)
     }
 
@@ -109,9 +103,6 @@ class DependencyCheckTests {
             group = 'io.github.woolph.test'
             
             qualityCheck {
-                sonarQube {
-                    skip = true
-                }
                 licenseCheck {
                     skip = true
                 }
@@ -133,7 +124,6 @@ class DependencyCheckTests {
         assertEquals(TaskOutcome.SKIPPED, result.task(":checkSuppressionFile")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
         assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
-        println(result.task(":jacocoTestReport")?.path)
         println(result.task(":dependencyCheckAnalyze")?.path)
     }
 
@@ -157,9 +147,6 @@ class DependencyCheckTests {
             group = 'io.github.woolph.test'
             
             qualityCheck {
-                sonarQube {
-                    skip = true
-                }
                 licenseCheck {
                     skip = true
                 }
@@ -193,7 +180,6 @@ class DependencyCheckTests {
         assertEquals(TaskOutcome.SUCCESS, result.task(":checkSuppressionFile")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
         assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
-        println(result.task(":jacocoTestReport")?.path)
         println(result.task(":dependencyCheckAnalyze")?.path)
     }
 
@@ -216,9 +202,6 @@ class DependencyCheckTests {
             group = 'io.github.woolph.test'
             
             qualityCheck {
-                sonarQube {
-                    skip = true
-                }
                 licenseCheck {
                     skip = true
                 }
@@ -247,7 +230,6 @@ class DependencyCheckTests {
         assertEquals(TaskOutcome.SUCCESS, result.task(":checkSuppressionFile")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
         assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
-        println(result.task(":jacocoTestReport")?.path)
         println(result.task(":dependencyCheckAnalyze")?.path)
     }
 

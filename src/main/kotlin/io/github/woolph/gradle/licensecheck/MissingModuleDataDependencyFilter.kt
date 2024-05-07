@@ -34,8 +34,7 @@ internal class MissingModuleDataDependencyFilter : DependencyFilter {
         mappingEntries
             .firstOrNull { it.appliesTo(moduleData) }
             ?.moduleDataMapper
-            ?.let { it(moduleData) }
-            ?: moduleData
+            ?.let { it(moduleData) } ?: moduleData
 
     private fun importedModuleDataMapper(
         importedModuleData: ImportedModuleData
@@ -43,8 +42,7 @@ internal class MissingModuleDataDependencyFilter : DependencyFilter {
         mappingEntries
             .firstOrNull { it.appliesTo(importedModuleData) }
             ?.importedModuleDataMapper
-            ?.let { it(importedModuleData) }
-            ?: importedModuleData
+            ?.let { it(importedModuleData) } ?: importedModuleData
 
     val mappingEntries =
         listOf(
@@ -57,6 +55,7 @@ internal class MissingModuleDataDependencyFilter : DependencyFilter {
                         moduleData.group,
                         moduleData.name,
                         moduleData.version,
+                        moduleData.hasArtifactFile,
                         moduleData.manifests,
                         moduleData.licenseFiles,
                         setOf(
@@ -96,6 +95,7 @@ internal class MissingModuleDataDependencyFilter : DependencyFilter {
                         moduleData.group,
                         moduleData.name,
                         moduleData.version,
+                        moduleData.hasArtifactFile,
                         moduleData.manifests,
                         moduleData.licenseFiles,
                         setOf(
@@ -135,6 +135,7 @@ internal class MissingModuleDataDependencyFilter : DependencyFilter {
                         moduleData.group,
                         moduleData.name,
                         moduleData.version,
+                        moduleData.hasArtifactFile,
                         moduleData.manifests,
                         moduleData.licenseFiles,
                         setOf(

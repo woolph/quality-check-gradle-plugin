@@ -7,7 +7,6 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.io.TempDir
@@ -22,9 +21,10 @@ class QualityCheckPluginTests {
         @JvmStatic
         val SUPPORTED_GRADLE_VERSIONS =
             listOf(
-                "8.5",
+                "8.7",
                 "8.1.1",
-                "7.6.1",
+                "7.6.4",
+                "7.0",
             ) // TODO consider supporting 6.9.4 as well (but Licensecheck plugin does
         // need to be downgraded for this
     }
@@ -60,9 +60,6 @@ class QualityCheckPluginTests {
                 dependencyCheck {
                     skip = true
                 }
-                sonarQube {
-                    skip = true
-                }
                 licenseCheck {
                     skip = true
                 }
@@ -81,7 +78,6 @@ class QualityCheckPluginTests {
 
         assertTrue(result.output.contains("licenseCheck will not be applied due to exception"))
         assertTrue(result.output.contains("dependencyCheck will not be applied due to exception"))
-        assertTrue(result.output.contains("sonarqube will not be applied due to exception"))
     }
 
     @ParameterizedTest
@@ -106,9 +102,6 @@ class QualityCheckPluginTests {
                 dependencyCheck {
                     skip = true
                 }
-                sonarQube {
-                    skip = true
-                }
                 licenseCheck {
                     skip = true
                 }
@@ -127,110 +120,11 @@ class QualityCheckPluginTests {
 
         assertTrue(result.output.contains("licenseCheck is disabled!"))
         assertTrue(result.output.contains("dependencyCheck is disabled!"))
-        assertTrue(result.output.contains("sonarqube is disabled!"))
 
         assertEquals(TaskOutcome.UP_TO_DATE, result.task(":check")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":sonar")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":jacocoTestReport")?.outcome)
         assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
-        println(result.task(":jacocoTestReport")?.path)
-        println(result.task(":dependencyCheckAnalyze")?.path)
-    }
-
-    @ParameterizedTest
-    @MethodSource("supportedGradleVersions")
-    fun `set sonarqube edition to community for non pull request`(gradleVersion: String) {
-        settingsFile.writeText(
-            """
-            rootProject.name = 'dependency-check-skip'
-            """
-                .trimIndent(),
-        )
-        buildFile.writeText(
-            """
-            plugins {
-                id 'java'
-                id 'io.github.woolph.quality-check'
-            }
-            
-            group = 'io.github.woolph.test'
-            
-            qualityCheck {
-                dependencyCheck {
-                    skip = true
-                }
-            }
-            """
-                .trimIndent(),
-        )
-
-        val result: BuildResult =
-            GradleRunner.create()
-                .withGradleVersion(gradleVersion)
-                .withProjectDir(testProjectDir)
-                .withArguments("check", "--stacktrace", "-Psonarqube.edition=community")
-                .withEnvironment(mapOf("BUILD_REASON" to "Scheduled"))
-                .withPluginClasspath()
-                .buildAndFail()
-
-        assertFalse(
-            result.output.contains(
-                "sonarqube is running on Community Edition and build reason is PullRequest => skipping sonarqube!"))
-
-        assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
-        assertEquals(TaskOutcome.FAILED, result.task(":sonar")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":jacocoTestReport")?.outcome)
-        assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
-    }
-
-    @ParameterizedTest
-    @MethodSource("supportedGradleVersions")
-    fun `set sonarqube edition to community for pull request`(gradleVersion: String) {
-        settingsFile.writeText(
-            """
-            rootProject.name = 'dependency-check-skip'
-            """
-                .trimIndent(),
-        )
-        buildFile.writeText(
-            """
-            plugins {
-                id 'java'
-                id 'io.github.woolph.quality-check'
-            }
-            
-            group = 'io.github.woolph.test'
-            
-            qualityCheck {
-                dependencyCheck {
-                    skip = true
-                }
-            }
-            """
-                .trimIndent(),
-        )
-
-        val result: BuildResult =
-            GradleRunner.create()
-                .withGradleVersion(gradleVersion)
-                .withProjectDir(testProjectDir)
-                .withArguments("check", "--stacktrace", "-Psonarqube.edition=community")
-                .withEnvironment(mapOf("BUILD_REASON" to "PullRequest"))
-                .withPluginClasspath()
-                .build()
-
-        assertTrue(
-            result.output.contains(
-                "sonarqube is running on Community Edition and build reason is PullRequest => skipping sonarqube!"))
-
-        assertEquals(TaskOutcome.SUCCESS, result.task(":check")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":sonar")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":jacocoTestReport")?.outcome)
-        assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
-        println(result.task(":jacocoTestReport")?.path)
         println(result.task(":dependencyCheckAnalyze")?.path)
     }
 
@@ -264,9 +158,6 @@ class QualityCheckPluginTests {
                 dependencyCheck {
                     skip = true
                 }
-                sonarQube {
-                    skip = true
-                }
             }
             """
                 .trimIndent(),
@@ -283,10 +174,7 @@ class QualityCheckPluginTests {
         assertEquals(TaskOutcome.SUCCESS, result.task(":check")?.outcome)
         assertEquals(TaskOutcome.SUCCESS, result.task(":checkLicenses")?.outcome)
         assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":sonar")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":jacocoTestReport")?.outcome)
         assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
-        println(result.task(":jacocoTestReport")?.path)
         println(result.task(":dependencyCheckAnalyze")?.path)
     }
 
@@ -318,9 +206,6 @@ class QualityCheckPluginTests {
             
             qualityCheck {
                 dependencyCheck {
-                    skip = true
-                }
-                sonarQube {
                     skip = true
                 }
                 licenseCheck {

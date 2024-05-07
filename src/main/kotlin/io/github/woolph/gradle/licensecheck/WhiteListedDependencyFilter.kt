@@ -45,6 +45,5 @@ internal class WhiteListedDependencyFilter(
                     }
                     .toList(),
             )
-        }
-            ?: source
+        } ?: source
 }

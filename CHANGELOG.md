@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased/Upcoming
 
+## [1.4.0]
+### Removed
+- Removed sonarqube plugin
+
 ## [1.2.8]() 2023-11-09
 ### Changed
 - added missing module data for org.jetbrains.kotlin:kotlin-stdlib-common:1.9.20
