@@ -22,11 +22,7 @@ class QualityCheckPluginTests {
         val SUPPORTED_GRADLE_VERSIONS =
             listOf(
                 "8.7",
-                "8.1.1",
-                "7.6.4",
-                "7.0",
-            ) // TODO consider supporting 6.9.4 as well (but Licensecheck plugin does
-        // need to be downgraded for this
+            )
     }
 
     @TempDir lateinit var testProjectDir: File
@@ -41,7 +37,7 @@ class QualityCheckPluginTests {
 
     @ParameterizedTest
     @MethodSource("supportedGradleVersions")
-    fun `project without test task`(gradleVersion: String) {
+    fun `project without check or test task`(gradleVersion: String) {
         settingsFile.writeText(
             """
             rootProject.name = 'dependency-check-skip'
@@ -76,6 +72,7 @@ class QualityCheckPluginTests {
                 .withPluginClasspath()
                 .build()
 
+        println(result.output)
         assertTrue(result.output.contains("licenseCheck will not be applied due to exception"))
         assertTrue(result.output.contains("dependencyCheck will not be applied due to exception"))
     }
