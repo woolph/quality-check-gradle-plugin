@@ -10,6 +10,9 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
+import kotlin.time.toJavaDuration
 
 /**
  * This task checks the suppression file provided for "inappropriate" suppression entries. An entry
@@ -24,14 +27,14 @@ import org.gradle.api.tasks.TaskAction
 abstract class CheckSuppressionFileTask : DefaultTask() {
     @get:InputFile @get:Optional abstract val originalSuppressionFile: RegularFileProperty
 
-    @get:Input abstract val maxSuppressUntil: Property<ZonedDateTime>
+    @get:Input abstract val maxSuppressUntil: Property<Duration>
 
     @get:Input abstract val falsePositivePattern: Property<Regex>
 
     init {
         group = "verification/dependency-check"
 
-        maxSuppressUntil.convention(ZonedDateTime.now().plusDays(365))
+        maxSuppressUntil.convention(365.days)
 
         falsePositivePattern.convention(Regex("false[\\s-_]positive", RegexOption.IGNORE_CASE))
     }
@@ -47,7 +50,7 @@ abstract class CheckSuppressionFileTask : DefaultTask() {
                 originalSuppressionEntries
                     .filter {
                         it.notes?.contains(falsePositivePattern) != true &&
-                            it.suppressUntil?.isBefore(maxSuppressUntil) != true
+                            it.suppressUntil?.isBefore(ZonedDateTime.now().plus(maxSuppressUntil.toJavaDuration())) != true
                     }
                     .toList()
 

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased/Upcoming
 
+## [2.1.0]
+### Added
+- added jacoco plugin again
+
+### Changed
+- updating dependency check plugin to 10.0.4
+
+## [2.0.0]
+### Changed
+- updating dependency check plugin to 9.1.0
+- removing sonar/sonarqube plugin
+
 ## [1.4.0]
 ### Removed
 - Removed sonarqube plugin

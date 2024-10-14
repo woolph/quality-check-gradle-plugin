@@ -9,21 +9,21 @@ Add the plugin with the id `io.github.woolph.quality-check` to your gradle build
 >####Kotlin DSL Sample *build.gradle.kts*
 >```kotlin
 >plugins {
->    id("io.github.woolph.quality-check") version "2.0.0"
+>    id("io.github.woolph.quality-check") version "2.1.0"
 >}
 >```
 
 >####Groovy DSL Sample *build.gradle*
 >```groovy
 >plugins {
->    id 'io.github.woolph.quality-check' version '2.0.0'
+>    id 'io.github.woolph.quality-check' version '2.1.0'
 >}
 >```
 
 ## What does it do?
 The quality check adds several other plugins to your gradle build with the intent to ensure code quality and code 
 security. More precisely, it adds the following plugins:
-* `org.owasp:dependency-check-gradle:9.1.0` which checks your 3rd party dependencies for known vulnerabilities
+* `org.owasp:dependency-check-gradle:10.0.4` which checks your 3rd party dependencies for known vulnerabilities
 * `com.github.jk1:gradle-license-report:2.7` which checks the licenses of your 3rd party dependencies
 
 Your gradle build is automatically configured in a way that the `check` of your build depends upon 
