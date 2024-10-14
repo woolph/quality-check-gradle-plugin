@@ -2,7 +2,7 @@
 jvmTarget = "11"
 
 [libraries]
-dependencyCheck = "org.owasp:dependency-check-gradle:9.1.0"
+dependencyCheck = "org.owasp:dependency-check-gradle:10.0.4"
 licenseReport = "com.github.jk1:gradle-license-report:2.7"
 kotlinxDatetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.5.0"
 kotlinxSerialization-core = "org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3"
