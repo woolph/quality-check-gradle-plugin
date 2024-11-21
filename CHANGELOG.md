@@ -7,19 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased/Upcoming
 
-## [2.1.0]
+## [2.2.1]()
+### Fixed
+- fixed usage of deprecated method in the dependency check plugin
+- reduce logging at warn level
+
+## [2.2.0]()
+### Added
+- added the possibility to skip checks by setting gradle properties in the gradle.properties file or passing them via cli arguments
+  - skipping the dependency check task by setting `skipDependencyCheck=true`
+  - skipping the license check task by setting `skipLicenseCheck=true`
+
+## [2.1.0]()
 ### Added
 - added jacoco plugin again
 
 ### Changed
 - updating dependency check plugin to 10.0.4
 
-## [2.0.0]
+## [2.0.0]()
 ### Changed
 - updating dependency check plugin to 9.1.0
 - removing sonar/sonarqube plugin
 
-## [1.4.0]
+## [1.4.0]()
 ### Removed
 - Removed sonarqube plugin
 
