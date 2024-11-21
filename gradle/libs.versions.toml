@@ -4,16 +4,16 @@ jvmTarget = "11"
 [libraries]
 dependencyCheck = "org.owasp:dependency-check-gradle:10.0.4"
 licenseReport = "com.github.jk1:gradle-license-report:2.7"
-kotlinxDatetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.5.0"
-kotlinxSerialization-core = "org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3"
-kotlinxSerialization-json = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
+kotlinxDatetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.6.1"
+kotlinxSerialization-core = "org.jetbrains.kotlinx:kotlinx-serialization-core:1.7.3"
+kotlinxSerialization-json = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
 
 databaseDrivers-postgres = "org.postgresql:postgresql:42.4.0"
 databaseDrivers-mssql = "com.microsoft.sqlserver:mssql-jdbc:12.2.0.jre11"
 
-test-junit-engine = "org.junit.jupiter:junit-jupiter-engine:5.10.2"
-test-junit-params = "org.junit.jupiter:junit-jupiter-params:5.10.2"
+test-junit-engine = "org.junit.jupiter:junit-jupiter-engine:5.11.3"
+test-junit-params = "org.junit.jupiter:junit-jupiter-params:5.11.3"
 
 [plugins]
-pluginPublish = "com.gradle.plugin-publish:1.2.1"
+pluginPublish = "com.gradle.plugin-publish:1.3.0"
 spotless = "com.diffplug.spotless:6.25.0"

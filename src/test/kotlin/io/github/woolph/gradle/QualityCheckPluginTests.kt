@@ -21,7 +21,7 @@ class QualityCheckPluginTests {
         @JvmStatic
         val SUPPORTED_GRADLE_VERSIONS =
             listOf(
-                "8.7",
+                "8.11.1",
             )
     }
 

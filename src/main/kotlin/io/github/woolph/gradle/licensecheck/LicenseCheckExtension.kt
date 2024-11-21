@@ -12,6 +12,7 @@ import kotlinx.datetime.Instant
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
+import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.invoke
@@ -87,6 +88,9 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                     "Bouncy Castle Licence", // is essentially the "MIT License"
                 ),
             )
+
+    internal val aggregatedSkip: Provider<Boolean> = project.providers.gradleProperty("skipLicenseCheck")
+        .map { it.toBoolean() }.orElse(skip)
 
     inner class WhiteListedDependenciesBuilder {
         val whiteListedDependencies = mutableMapOf<Regex, Instant>()
@@ -174,7 +178,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                                 CheckLicenseTaskJunitReport.PROJECT_JSON_FOR_LICENSE_CHECKING_FILE))
                         this.tmpDirectory.set(tmpDirectory)
 
-                        onlyIf { thisExtension.skip.map { !it }.get() }
+                        onlyIf { thisExtension.aggregatedSkip.map { !it }.get() }
 
                         dependsOn(generateLicenseReport)
                     }
@@ -188,7 +192,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                 check { dependsOn(checkLicense) }
 
                 afterEvaluate {
-                    if (thisExtension.skip.get()) {
+                    if (thisExtension.aggregatedSkip.get()) {
                         logger.warn("licenseCheck is disabled!")
                     }
 

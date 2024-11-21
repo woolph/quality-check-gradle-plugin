@@ -48,6 +48,9 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
             .fileProperty()
             .convention(project.layout.projectDirectory.file("dependency-check-suppression.xml"))
 
+    internal val aggregatedSkip: Provider<Boolean> = project.providers.gradleProperty("skipDependencyCheck")
+        .map { it.toBoolean() }.orElse(skip)
+
     companion object {
         internal fun Project.getParentDirectoryOf(
             file: Provider<RegularFile>
@@ -139,7 +142,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                     tasks.named<org.owasp.dependencycheck.gradle.tasks.Analyze>(
                         "dependencyCheckAnalyze") {
                             group = "verification/dependency-check"
-                            onlyIf { thisExtension.skip.map { !it }.get() }
+                            onlyIf { thisExtension.aggregatedSkip.map { !it }.get() }
                             dependsOn(checkSuppressionFileTask)
 
                             finalizedBy(printVulnerabilityCause)
@@ -148,7 +151,9 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                 check { dependsOn(dependencyCheckAnalyze) }
 
                 afterEvaluate {
-                    if (thisExtension.skip.get()) {
+                    val aggregatedSkip = thisExtension.aggregatedSkip.get()
+
+                    if (aggregatedSkip) {
                         logger.warn("dependencyCheck is disabled!")
                     }
 
@@ -157,7 +162,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                             org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension>(
                             "dependencyCheck")
                         .apply {
-                            skip = thisExtension.skip.get()
+                            skip = aggregatedSkip
                             failBuildOnCVSS = thisExtension.cvssThreshold.get().toFloat()
                             formats =
                                 listOf(

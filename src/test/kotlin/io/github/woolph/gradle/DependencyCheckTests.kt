@@ -26,6 +26,9 @@ class DependencyCheckTests {
     val buildFile: File
         get() = File(testProjectDir, "build.gradle")
 
+    val gradleProperties: File
+        get() = File(testProjectDir, "gradle.properties")
+
     val dependencyCheckSuppression: File
         get() = File(testProjectDir, "dependency-check-suppression.xml")
 
@@ -39,7 +42,7 @@ class DependencyCheckTests {
 
     @ParameterizedTest
     @MethodSource("supportedGradleVersions")
-    fun `set dependency check to skip`(gradleVersion: String) {
+    fun `skip dependency check via extension`(gradleVersion: String) {
         settingsFile hasContent
             """
             rootProject.name = 'dependency-check-skip'
@@ -62,6 +65,97 @@ class DependencyCheckTests {
                     skip = true
                 }
             }
+            """
+
+        dependencyCheckSuppression.doesNotExist()
+
+        val result: BuildResult =
+            GradleRunner.create()
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(testProjectDir)
+                .withArguments("check")
+                .withPluginClasspath()
+                .build()
+
+        assertTrue(result.output.contains("dependencyCheck is disabled!"))
+
+        assertEquals(TaskOutcome.UP_TO_DATE, result.task(":check")?.outcome)
+        assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
+        assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
+        assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
+        println(result.task(":dependencyCheckAnalyze")?.path)
+    }
+
+    @ParameterizedTest
+    @MethodSource("supportedGradleVersions")
+    fun `skip dependency check via cli`(gradleVersion: String) {
+        settingsFile hasContent
+            """
+            rootProject.name = 'dependency-check-skip'
+            """
+
+        buildFile hasContent
+            """
+            plugins {
+                id 'java'
+                id 'io.github.woolph.quality-check'
+            }
+            
+            group = 'io.github.woolph.test'
+            
+            qualityCheck {
+                licenseCheck {
+                    skip = true
+                }
+            }
+            """
+
+        dependencyCheckSuppression.doesNotExist()
+
+        val result: BuildResult =
+            GradleRunner.create()
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(testProjectDir)
+                .withArguments("check", "-PskipDependencyCheck=true")
+                .withPluginClasspath()
+                .build()
+
+        assertTrue(result.output.contains("dependencyCheck is disabled!"))
+
+        assertEquals(TaskOutcome.UP_TO_DATE, result.task(":check")?.outcome)
+        assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
+        assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
+        assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
+        println(result.task(":dependencyCheckAnalyze")?.path)
+    }
+
+    @ParameterizedTest
+    @MethodSource("supportedGradleVersions")
+    fun `skip dependency check via gradle properties`(gradleVersion: String) {
+        settingsFile hasContent
+            """
+            rootProject.name = 'dependency-check-skip'
+            """
+
+        buildFile hasContent
+            """
+            plugins {
+                id 'java'
+                id 'io.github.woolph.quality-check'
+            }
+            
+            group = 'io.github.woolph.test'
+            
+            qualityCheck {
+                licenseCheck {
+                    skip = true
+                }
+            }
+            """
+
+        gradleProperties hasContent
+            """
+            skipDependencyCheck=true
             """
 
         dependencyCheckSuppression.doesNotExist()

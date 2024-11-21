@@ -9,12 +9,11 @@ plugins {
     alias(libs.plugins.pluginPublish)
 
     alias(libs.plugins.spotless)
-    //    kotlin("jvm")
 }
 
 group = "io.github.woolph.quality-check"
 
-version = "2.1.0"
+version = "2.2.0"
 
 gradlePlugin {
     website.set("https://github.com/woolph/quality-check-gradle-plugin")
@@ -49,7 +48,6 @@ dependencies {
     testImplementation(libs.test.junit.params)
     testRuntimeOnly(libs.test.junit.engine)
     // endregion
-    //    implementation(kotlin("stdlib-jdk8"))
 }
 
 kotlin { jvmToolchain(libs.versions.jvmTarget.map { it.toInt() }.get()) }
