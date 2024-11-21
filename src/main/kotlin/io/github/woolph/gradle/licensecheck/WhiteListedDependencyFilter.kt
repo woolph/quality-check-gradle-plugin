@@ -17,7 +17,7 @@ internal class WhiteListedDependencyFilter(
 ) : DependencyFilter {
     override fun filter(source: ProjectData) =
         regexProvider.orNull?.let { regexs ->
-            logger.warn("white-listed dependencies are: ${regexs.joinToString(", ")}")
+            logger.info("white-listed dependencies are: ${regexs.joinToString(", ")}")
             ProjectData(
                 source.project,
                 source.configurations

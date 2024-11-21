@@ -170,7 +170,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                                     "JUNIT",
                                 )
                             if (thisExtension.suppressionFile.get().asFile.exists()) {
-                                logger.warn(
+                                logger.info(
                                     "dependencyCheck suppression file ${thisExtension.suppressionFile.get()} is being applied")
                                 suppressionFile =
                                     thisExtension.suppressionFile.get().asFile.toString()
@@ -191,32 +191,22 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                                     .map { it.name }
 
                             if (project.hasProperty("DEPENDENCY_CHECK_DB_CONNECTION")) {
-                                logger.warn(
+                                logger.info(
                                     "dependencyCheck uses ${project.properties["DEPENDENCY_CHECK_DB_CONNECTION"]} instead of default in-mem-db (=> autoUpdate is deactivated!)")
                                 autoUpdate = false
 
-                                data(
-                                    delegateClosureOf<groovy.lang.GroovyObject> {
-                                        setProperty(
-                                            "driver",
-                                            project.properties["DEPENDENCY_CHECK_DB_DRIVER"])
-                                        setProperty(
-                                            "connectionString",
-                                            project.properties["DEPENDENCY_CHECK_DB_CONNECTION"])
-                                        if (project.hasProperty("DEPENDENCY_CHECK_DB_USER")) {
-                                            setProperty(
-                                                "username",
-                                                project.properties["DEPENDENCY_CHECK_DB_USER"])
-                                        }
-                                        if (project.hasProperty("DEPENDENCY_CHECK_DB_PASSWORD")) {
-                                            setProperty(
-                                                "password",
-                                                project.properties["DEPENDENCY_CHECK_DB_PASSWORD"])
-                                        }
-                                    },
-                                )
+                                data {
+                                    driver = project.properties["DEPENDENCY_CHECK_DB_DRIVER"].toString()
+                                    connectionString = project.properties["DEPENDENCY_CHECK_DB_CONNECTION"].toString()
+                                    if (project.hasProperty("DEPENDENCY_CHECK_DB_USER")) {
+                                        username =  project.properties["DEPENDENCY_CHECK_DB_USER"].toString()
+                                    }
+                                    if (project.hasProperty("DEPENDENCY_CHECK_DB_PASSWORD")) {
+                                        password =  project.properties["DEPENDENCY_CHECK_DB_PASSWORD"].toString()
+                                    }
+                                }
                             } else {
-                                logger.warn("dependencyCheck using default settings for data")
+                                logger.info("dependencyCheck using default settings for data")
                             }
                         }
                 }
