@@ -4,7 +4,6 @@ package io.github.woolph.gradle.dependencycheck
 import io.github.woolph.gradle.Skipable
 import io.github.woolph.gradle.dependencycheck.suppression.CheckSuppressionFileTask
 import io.github.woolph.gradle.dependencycheck.suppression.GenerateSuppressionFileTask
-import io.github.woolph.gradle.dependencycheck.suppression.PrintVulnerabilityCauseTask
 import io.github.woolph.gradle.dependencycheck.suppression.UpdateSuppressionFileTask
 import java.io.File
 import javax.inject.Inject
@@ -16,12 +15,10 @@ import org.gradle.api.internal.provider.Providers
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.invoke
-import org.gradle.kotlin.dsl.named
-import java.time.LocalDate
+import org.gradle.kotlin.dsl.register
 
 abstract class DependencyCheckExtension @Inject constructor(project: Project) : Skipable {
     override val skip: Property<Boolean> =
@@ -35,10 +32,6 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
      */
     val cvssThreshold: Property<Double> =
         project.objects.property(Double::class.java).convention(0.0)
-
-    /** defines whether the cause of a vulnerability should be printed to the console. */
-    val printVulnerabilityCauseEnabled: Property<Boolean> =
-        project.objects.property(Boolean::class.java).convention(false)
 
     /**
      * location of the dependencyCheck suppression file. Defaults to
@@ -87,7 +80,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
             }
         }
 
-        internal fun Provider<RegularFile>.filterExists(): Provider<RegularFile> = filter {
+        internal fun Provider<RegularFile>.filterExists(): Provider<RegularFile> = filter2 {
             it.asFile.exists()
         }
 
@@ -125,44 +118,42 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                         })
                 }
 
-                val printVulnerabilityCause =
-                    tasks.create<PrintVulnerabilityCauseTask>("printVulnerabilityCause") {
-                        onlyIf("printVulnerabilityCauseEnabled is true") {
-                            thisExtension.printVulnerabilityCauseEnabled.get()
-                        }
-                    }
-
                 listOf(
                         "dependencyCheckAggregate",
                         "dependencyCheckPurge",
                         "dependencyCheckUpdate",
+                        "dependencyCheckAnalyze",
                     )
                     .forEach { taskName ->
                         tasks.named(taskName) { group = "verification/dependency-check" }
                     }
 
-                val dependencyCheckAnalyze =
-                    tasks.named<org.owasp.dependencycheck.gradle.tasks.Analyze>(
-                        "dependencyCheckAnalyze") {
-                            group = "verification/dependency-check"
-                            onlyIf { thisExtension.aggregatedSkip.map { !it }.get() }
-                            dependsOn(checkSuppressionFileTask)
+//                val dependencyCheckAnalyze =
+//                    tasks.named<org.owasp.dependencycheck.gradle.tasks.Analyze>(
+//                        "dependencyCheckAnalyze") {
+//                            group = "verification/dependency-check"
+//                            onlyIf { thisExtension.aggregatedSkip.map { !it }.get() }
+//
+//                            finalizedBy(printVulnerabilityCause)
+//
+////                            inputs.file(project.layout.projectDirectory.file("gradle.lockfile")).withPathSensitivity(PathSensitivity.RELATIVE)
+////                                .withPropertyName("dependencyTree")
+//                            inputs.files(project.configurations.getByName("runtimeClasspath"))
+//                                .withPropertyName("runtimeClasspath")
+//                                .withPathSensitivity(PathSensitivity.RELATIVE)
+//                            inputs.property("today", LocalDate.now())
+//
+//                            outputs.cacheIf { true }
+//                            outputs.file(project.layout.buildDirectory.file("reports/dependency-check-junit.xml"))
+//                                .withPropertyName("reportJunit")
+//                        }
+//
+//                check { dependsOn(dependencyCheckAnalyze) }
 
-                            finalizedBy(printVulnerabilityCause)
-
-//                            inputs.file(project.layout.projectDirectory.file("gradle.lockfile")).withPathSensitivity(PathSensitivity.RELATIVE)
-//                                .withPropertyName("dependencyTree")
-                            inputs.files(project.configurations.getByName("runtimeClasspath"))
-                                .withPropertyName("runtimeClasspath")
-                                .withPathSensitivity(PathSensitivity.RELATIVE)
-                            inputs.property("today", LocalDate.now())
-
-                            outputs.cacheIf { true }
-                            outputs.file(project.layout.buildDirectory.file("reports/dependency-check-junit.xml"))
-                                .withPropertyName("reportJunit")
-                        }
-
-                check { dependsOn(dependencyCheckAnalyze) }
+                val checkVulnerabilities = tasks.register<CheckVulnerabilities>("checkVulnerabilities") {
+                    dependsOn(checkSuppressionFileTask)
+                }
+                check { dependsOn(checkVulnerabilities) }
 
                 afterEvaluate {
                     val aggregatedSkip = thisExtension.aggregatedSkip.get()

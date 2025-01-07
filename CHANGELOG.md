@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased/Upcoming
 
+## [3.0.0]()
+### Fixed
+- fixed wrong classpath fingerprint/cache key calculation for subprojects by introducing a new task named `checkVulnerability` encapsulating the `dependencyCheckAnalyze` task (it also integrates the `printVulnerabilityCause` task, which is therefore obsolete)
+
 ## [2.2.2]()
 ### Changed
 - improved build cache behavior for dependency check and license check tasks
