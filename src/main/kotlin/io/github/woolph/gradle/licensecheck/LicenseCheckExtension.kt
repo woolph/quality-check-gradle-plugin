@@ -13,6 +13,7 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.invoke
@@ -148,7 +149,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                 val createLicenseBundleNormalizerConfig =
                     tasks.create<CreateLicenseBundleNormalizerConfigTask>(
                         "createLicenseBundleNormalizerConfig") {
-                            this.additonalLicenseNormalizerBundle.set(
+                            this.additionalLicenseNormalizerBundle.set(
                                 additonalLicenseNormalizerBundle)
                         }
 
@@ -161,7 +162,9 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                             thisExtension.whiteListedDependencies.map { it.map { it.toString() } },
                         )
                         inputs.file(
-                            createLicenseBundleNormalizerConfig.additonalLicenseNormalizerBundle)
+                            createLicenseBundleNormalizerConfig.additionalLicenseNormalizerBundle)
+                            .withPathSensitivity(PathSensitivity.RELATIVE)
+                            .withPropertyName("additionalLicenseNormalizerBundle")
                     }
 
                 val checkLicense =
@@ -171,14 +174,15 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                         // CheckLicenseTaskJunitReport::class.java) {
 
                         allowedLicenses.set(thisExtension.allowedLicenses)
-                        licenseCheckReport.set(
-                            thisExtension.reportsDirectory.file("license-check-report.xml"))
+                        licenseCheckReport.set(thisExtension.licenseCheckReport)
                         projectDependenciesData.set(
                             thisExtension.reportsDirectory.file(
                                 CheckLicenseTaskJunitReport.PROJECT_JSON_FOR_LICENSE_CHECKING_FILE))
                         this.tmpDirectory.set(tmpDirectory)
 
                         onlyIf { thisExtension.aggregatedSkip.map { !it }.get() }
+
+                        outputs.cacheIf { true }
 
                         dependsOn(generateLicenseReport)
                     }
@@ -270,7 +274,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                                     MissingModuleDataDependencyFilter(),
                                     OnDemandBundleNormalizerFilter(
                                         createLicenseBundleNormalizerConfig
-                                            .additonalLicenseNormalizerBundle,
+                                            .additionalLicenseNormalizerBundle,
                                     ),
                                 )
                         }

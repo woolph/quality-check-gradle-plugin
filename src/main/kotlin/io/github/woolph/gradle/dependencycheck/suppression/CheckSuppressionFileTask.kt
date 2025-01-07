@@ -1,16 +1,21 @@
 /* Copyright 2023 ENGEL Austria GmbH */
 package io.github.woolph.gradle.dependencycheck.suppression
 
-import java.time.ZonedDateTime
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
-import kotlin.time.Duration
+import java.time.Duration
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlin.time.Duration.Companion.days
 import kotlin.time.toJavaDuration
 
@@ -24,19 +29,31 @@ import kotlin.time.toJavaDuration
  *   reevaluate the vulnerability. Therefore this expiring suppression may be useful for
  *   vulnerabilities that, for some reason, cannot be fixed right away.
  */
+@CacheableTask
 abstract class CheckSuppressionFileTask : DefaultTask() {
-    @get:InputFile @get:Optional abstract val originalSuppressionFile: RegularFileProperty
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Optional abstract val originalSuppressionFile: RegularFileProperty
 
     @get:Input abstract val maxSuppressUntil: Property<Duration>
 
     @get:Input abstract val falsePositivePattern: Property<Regex>
 
+    @get:Input abstract val today: Property<LocalDate>
+
+    @get:OutputFile abstract val suppressionFileCheckResult: RegularFileProperty
+
     init {
         group = "verification/dependency-check"
 
-        maxSuppressUntil.convention(365.days)
+        maxSuppressUntil.convention(365.days.toJavaDuration())
+
+        suppressionFileCheckResult.convention(project.layout.buildDirectory.file("reports/dependency-check/suppression-file-check-result.txt"))
 
         falsePositivePattern.convention(Regex("false[\\s-_]positive", RegexOption.IGNORE_CASE))
+
+        today.set(LocalDate.now())
+        today.finalizeValue()
     }
 
     @TaskAction
@@ -50,9 +67,11 @@ abstract class CheckSuppressionFileTask : DefaultTask() {
                 originalSuppressionEntries
                     .filter {
                         it.notes?.contains(falsePositivePattern) != true &&
-                            it.suppressUntil?.isBefore(ZonedDateTime.now().plus(maxSuppressUntil.toJavaDuration())) != true
+                            it.suppressUntil?.isBefore(today.get().atStartOfDay(ZoneId.systemDefault()).plus(maxSuppressUntil)) != true
                     }
                     .toList()
+
+            suppressionFileCheckResult.get().asFile.writeText(inappropriateEntries.joinToString("\n"))
 
             if (inappropriateEntries.isNotEmpty()) {
                 inappropriateEntries.forEach {

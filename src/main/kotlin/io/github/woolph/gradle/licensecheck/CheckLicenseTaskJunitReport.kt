@@ -12,7 +12,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
@@ -25,9 +25,9 @@ abstract class CheckLicenseTaskJunitReport : DefaultTask() {
 
     @get:Input abstract val allowedLicenses: SetProperty<String>
 
-    @get:OutputDirectory abstract val tmpDirectory: DirectoryProperty
-
     @get:InputFile abstract val projectDependenciesData: RegularFileProperty
+
+    @get:Internal abstract val tmpDirectory: DirectoryProperty
 
     @get:OutputFile abstract val licenseCheckReport: RegularFileProperty
 
@@ -40,7 +40,7 @@ abstract class CheckLicenseTaskJunitReport : DefaultTask() {
 
     @TaskAction
     fun checkLicense() {
-        logger.info("Startup CheckLicense for ${getProject().name}")
+        logger.info("Startup CheckLicense for ${project.name}")
         logger.info("Check licenses if they are allowed to use.")
 
         tmpDirectory.asFile.get().mkdirs()

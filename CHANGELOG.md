@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased/Upcoming
 
+## [2.2.2]()
+### Changed
+- improved build cache behavior for dependency check and license check tasks
+  - dependency check is now considered up-to-date if the it was run already on the the same day (dependency check relies on external data (NVD database), but the mirror database used by the CI pipeline is only updated once a day, therefore multiple checks per day are not necessary)
+
 ## [2.2.1]()
 ### Fixed
 - fixed usage of deprecated method in the dependency check plugin

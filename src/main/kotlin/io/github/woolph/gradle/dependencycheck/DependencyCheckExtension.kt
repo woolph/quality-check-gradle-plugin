@@ -16,11 +16,12 @@ import org.gradle.api.internal.provider.Providers
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.delegateClosureOf
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.named
+import java.time.LocalDate
 
 abstract class DependencyCheckExtension @Inject constructor(project: Project) : Skipable {
     override val skip: Property<Boolean> =
@@ -86,7 +87,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
             }
         }
 
-        internal fun Provider<RegularFile>.filterExists(): Provider<RegularFile> = filter2 {
+        internal fun Provider<RegularFile>.filterExists(): Provider<RegularFile> = filter {
             it.asFile.exists()
         }
 
@@ -102,6 +103,8 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
 
                 val checkSuppressionFileTask =
                     tasks.create<CheckSuppressionFileTask>("checkSuppressionFile") {
+                        group = "verification/dependency-check"
+
                         originalSuppressionFile.convention(thisExtension.suppressionFile)
                         onlyIf { thisExtension.suppressionFile.asFile.get().exists() }
                     }
@@ -146,6 +149,17 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                             dependsOn(checkSuppressionFileTask)
 
                             finalizedBy(printVulnerabilityCause)
+
+//                            inputs.file(project.layout.projectDirectory.file("gradle.lockfile")).withPathSensitivity(PathSensitivity.RELATIVE)
+//                                .withPropertyName("dependencyTree")
+                            inputs.files(project.configurations.getByName("runtimeClasspath"))
+                                .withPropertyName("runtimeClasspath")
+                                .withPathSensitivity(PathSensitivity.RELATIVE)
+                            inputs.property("today", LocalDate.now())
+
+                            outputs.cacheIf { true }
+                            outputs.file(project.layout.buildDirectory.file("reports/dependency-check-junit.xml"))
+                                .withPropertyName("reportJunit")
                         }
 
                 check { dependsOn(dependencyCheckAnalyze) }
