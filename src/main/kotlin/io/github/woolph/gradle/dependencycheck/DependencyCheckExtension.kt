@@ -42,8 +42,8 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
             .fileProperty()
             .convention(project.layout.projectDirectory.file("dependency-check-suppression.xml"))
 
-    internal val aggregatedSkip: Provider<Boolean> = project.providers.gradleProperty("skipDependencyCheck")
-        .map { it.toBoolean() }.orElse(skip)
+    internal val aggregatedSkip: Provider<Boolean> =
+        project.providers.gradleProperty("skipDependencyCheck").map { it.toBoolean() }.orElse(skip)
 
     companion object {
         internal fun Project.getParentDirectoryOf(
@@ -128,31 +128,36 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                         tasks.named(taskName) { group = "verification/dependency-check" }
                     }
 
-//                val dependencyCheckAnalyze =
-//                    tasks.named<org.owasp.dependencycheck.gradle.tasks.Analyze>(
-//                        "dependencyCheckAnalyze") {
-//                            group = "verification/dependency-check"
-//                            onlyIf { thisExtension.aggregatedSkip.map { !it }.get() }
-//
-//                            finalizedBy(printVulnerabilityCause)
-//
-////                            inputs.file(project.layout.projectDirectory.file("gradle.lockfile")).withPathSensitivity(PathSensitivity.RELATIVE)
-////                                .withPropertyName("dependencyTree")
-//                            inputs.files(project.configurations.getByName("runtimeClasspath"))
-//                                .withPropertyName("runtimeClasspath")
-//                                .withPathSensitivity(PathSensitivity.RELATIVE)
-//                            inputs.property("today", LocalDate.now())
-//
-//                            outputs.cacheIf { true }
-//                            outputs.file(project.layout.buildDirectory.file("reports/dependency-check-junit.xml"))
-//                                .withPropertyName("reportJunit")
-//                        }
-//
-//                check { dependsOn(dependencyCheckAnalyze) }
+                //                val dependencyCheckAnalyze =
+                //                    tasks.named<org.owasp.dependencycheck.gradle.tasks.Analyze>(
+                //                        "dependencyCheckAnalyze") {
+                //                            group = "verification/dependency-check"
+                //                            onlyIf { thisExtension.aggregatedSkip.map { !it
+                // }.get() }
+                //
+                //                            finalizedBy(printVulnerabilityCause)
+                //
+                ////
+                // inputs.file(project.layout.projectDirectory.file("gradle.lockfile")).withPathSensitivity(PathSensitivity.RELATIVE)
+                ////                                .withPropertyName("dependencyTree")
+                //
+                // inputs.files(project.configurations.getByName("runtimeClasspath"))
+                //                                .withPropertyName("runtimeClasspath")
+                //                                .withPathSensitivity(PathSensitivity.RELATIVE)
+                //                            inputs.property("today", LocalDate.now())
+                //
+                //                            outputs.cacheIf { true }
+                //
+                // outputs.file(project.layout.buildDirectory.file("reports/dependency-check-junit.xml"))
+                //                                .withPropertyName("reportJunit")
+                //                        }
+                //
+                //                check { dependsOn(dependencyCheckAnalyze) }
 
-                val checkVulnerabilities = tasks.register<CheckVulnerabilities>("checkVulnerabilities") {
-                    dependsOn(checkSuppressionFileTask)
-                }
+                val checkVulnerabilities =
+                    tasks.register<CheckVulnerabilities>("checkVulnerabilities") {
+                        dependsOn(checkSuppressionFileTask)
+                    }
                 check { dependsOn(checkVulnerabilities) }
 
                 afterEvaluate {
@@ -201,13 +206,20 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                                 autoUpdate = false
 
                                 data {
-                                    driver = project.properties["DEPENDENCY_CHECK_DB_DRIVER"].toString()
-                                    connectionString = project.properties["DEPENDENCY_CHECK_DB_CONNECTION"].toString()
+                                    driver =
+                                        project.properties["DEPENDENCY_CHECK_DB_DRIVER"].toString()
+                                    connectionString =
+                                        project.properties["DEPENDENCY_CHECK_DB_CONNECTION"]
+                                            .toString()
                                     if (project.hasProperty("DEPENDENCY_CHECK_DB_USER")) {
-                                        username =  project.properties["DEPENDENCY_CHECK_DB_USER"].toString()
+                                        username =
+                                            project.properties["DEPENDENCY_CHECK_DB_USER"]
+                                                .toString()
                                     }
                                     if (project.hasProperty("DEPENDENCY_CHECK_DB_PASSWORD")) {
-                                        password =  project.properties["DEPENDENCY_CHECK_DB_PASSWORD"].toString()
+                                        password =
+                                            project.properties["DEPENDENCY_CHECK_DB_PASSWORD"]
+                                                .toString()
                                     }
                                 }
                             } else {

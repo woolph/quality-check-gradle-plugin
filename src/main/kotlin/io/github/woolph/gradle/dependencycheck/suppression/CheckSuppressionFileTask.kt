@@ -1,6 +1,11 @@
 /* Copyright 2023 ENGEL Austria GmbH */
 package io.github.woolph.gradle.dependencycheck.suppression
 
+import java.time.Duration
+import java.time.LocalDate
+import java.time.ZoneId
+import kotlin.time.Duration.Companion.days
+import kotlin.time.toJavaDuration
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.RegularFileProperty
@@ -13,11 +18,6 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
-import java.time.Duration
-import java.time.LocalDate
-import java.time.ZoneId
-import kotlin.time.Duration.Companion.days
-import kotlin.time.toJavaDuration
 
 /**
  * This task checks the suppression file provided for "inappropriate" suppression entries. An entry
@@ -33,7 +33,8 @@ import kotlin.time.toJavaDuration
 abstract class CheckSuppressionFileTask : DefaultTask() {
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:Optional abstract val originalSuppressionFile: RegularFileProperty
+    @get:Optional
+    abstract val originalSuppressionFile: RegularFileProperty
 
     @get:Input abstract val maxSuppressUntil: Property<Duration>
 
@@ -48,7 +49,9 @@ abstract class CheckSuppressionFileTask : DefaultTask() {
 
         maxSuppressUntil.convention(365.days.toJavaDuration())
 
-        suppressionFileCheckResult.convention(project.layout.buildDirectory.file("reports/dependency-check/suppression-file-check-result.txt"))
+        suppressionFileCheckResult.convention(
+            project.layout.buildDirectory.file(
+                "reports/dependency-check/suppression-file-check-result.txt"))
 
         falsePositivePattern.convention(Regex("false[\\s-_]positive", RegexOption.IGNORE_CASE))
 
@@ -67,11 +70,18 @@ abstract class CheckSuppressionFileTask : DefaultTask() {
                 originalSuppressionEntries
                     .filter {
                         it.notes?.contains(falsePositivePattern) != true &&
-                            it.suppressUntil?.isBefore(today.get().atStartOfDay(ZoneId.systemDefault()).plus(maxSuppressUntil)) != true
+                            it.suppressUntil?.isBefore(
+                                today
+                                    .get()
+                                    .atStartOfDay(ZoneId.systemDefault())
+                                    .plus(maxSuppressUntil)) != true
                     }
                     .toList()
 
-            suppressionFileCheckResult.get().asFile.writeText(inappropriateEntries.joinToString("\n"))
+            suppressionFileCheckResult
+                .get()
+                .asFile
+                .writeText(inappropriateEntries.joinToString("\n"))
 
             if (inappropriateEntries.isNotEmpty()) {
                 inappropriateEntries.forEach {

@@ -90,8 +90,8 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                 ),
             )
 
-    internal val aggregatedSkip: Provider<Boolean> = project.providers.gradleProperty("skipLicenseCheck")
-        .map { it.toBoolean() }.orElse(skip)
+    internal val aggregatedSkip: Provider<Boolean> =
+        project.providers.gradleProperty("skipLicenseCheck").map { it.toBoolean() }.orElse(skip)
 
     inner class WhiteListedDependenciesBuilder {
         val whiteListedDependencies = mutableMapOf<Regex, Instant>()
@@ -161,8 +161,10 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                             "whiteListedDependencies",
                             thisExtension.whiteListedDependencies.map { it.map { it.toString() } },
                         )
-                        inputs.file(
-                            createLicenseBundleNormalizerConfig.additionalLicenseNormalizerBundle)
+                        inputs
+                            .file(
+                                createLicenseBundleNormalizerConfig
+                                    .additionalLicenseNormalizerBundle)
                             .withPathSensitivity(PathSensitivity.RELATIVE)
                             .withPropertyName("additionalLicenseNormalizerBundle")
                     }

@@ -3,4 +3,4 @@ package io.github.woolph.gradle
 
 import org.gradle.api.plugins.ExtensionAware
 
-@Suppress("UnnecessaryAbstractClass") abstract class QualityCheckExtension: ExtensionAware
+@Suppress("UnnecessaryAbstractClass") abstract class QualityCheckExtension : ExtensionAware

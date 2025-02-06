@@ -153,8 +153,7 @@ class DependencyCheckTests {
             }
             """
 
-        gradleProperties hasContent
-            """
+        gradleProperties hasContent """
             skipDependencyCheck=true
             """
 

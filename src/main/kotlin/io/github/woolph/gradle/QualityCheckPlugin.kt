@@ -20,14 +20,11 @@ class QualityCheckPlugin : Plugin<Project> {
         project.run {
             plugins.apply("jacoco")
 
-            val jacocoTestReport = tasks.named<org.gradle.testing.jacoco.tasks.JacocoReport>("jacocoTestReport") {
-                reports {
-                    xml.required.set(true)
+            val jacocoTestReport =
+                tasks.named<org.gradle.testing.jacoco.tasks.JacocoReport>("jacocoTestReport") {
+                    reports { xml.required.set(true) }
                 }
-            }
-            tasks.named<org.gradle.api.tasks.testing.Test>("test") {
-                finalizedBy(jacocoTestReport)
-            }
+            tasks.named<org.gradle.api.tasks.testing.Test>("test") { finalizedBy(jacocoTestReport) }
 
             qualityCheckExtension = extensions.create("qualityCheck", QualityCheckExtension::class)
             applyDependencyCheckExtension(qualityCheckExtension)
