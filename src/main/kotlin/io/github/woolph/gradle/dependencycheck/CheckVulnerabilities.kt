@@ -31,111 +31,107 @@ import org.gradle.kotlin.dsl.named
 
 @CacheableTask
 abstract class CheckVulnerabilities : DefaultTask() {
-    @get:Classpath abstract val classpath: Property<Configuration>
+  @get:Classpath abstract val classpath: Property<Configuration>
 
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:Optional
-    abstract val suppressionFile: RegularFileProperty
+  @get:InputFile
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  @get:Optional
+  abstract val suppressionFile: RegularFileProperty
 
-    @get:Input val today: LocalDate = LocalDate.now()
+  @get:Input val today: LocalDate = LocalDate.now()
 
-    @get:OutputFile abstract val reportJunit: RegularFileProperty
+  @get:OutputFile abstract val reportJunit: RegularFileProperty
 
-    @get:Internal
-    val dependencyCheckAnalyze =
-        project.tasks.named<org.owasp.dependencycheck.gradle.tasks.Analyze>(
-            "dependencyCheckAnalyze")
+  @get:Internal
+  val dependencyCheckAnalyze =
+      project.tasks.named<org.owasp.dependencycheck.gradle.tasks.Analyze>("dependencyCheckAnalyze")
 
-    init {
-        group = "verification/dependency-check"
+  init {
+    group = "verification/dependency-check"
 
-        classpath.convention(project.configurations.getByName("runtimeClasspath"))
-        reportJunit.convention(
-            project.layout.buildDirectory.file("reports/dependency-check-junit.xml"))
-    }
+    classpath.convention(project.configurations.getByName("runtimeClasspath"))
+    reportJunit.convention(project.layout.buildDirectory.file("reports/dependency-check-junit.xml"))
+  }
 
-    @TaskAction
-    fun checkVulnerabilities() {
-        try {
-            dependencyCheckAnalyze.get().analyze()
-        } finally {
-            val resolutionResult = classpath.get().incoming.resolutionResult
+  @TaskAction
+  fun checkVulnerabilities() {
+    try {
+      dependencyCheckAnalyze.get().analyze()
+    } finally {
+      val resolutionResult = classpath.get().incoming.resolutionResult
 
-            val vulnerabilities =
-                reportJunit.asFileIfExists?.processXml { doc ->
-                    doc.children().flatMap { testsuites ->
-                        testsuites
-                            .children()
-                            .filter { (it.attributes["failures"]?.value?.toInt() ?: 0) > 0 }
-                            .children()
-                            .mapNotNull { testcase ->
-                                testcase.attributes["classname"]?.value?.let { vulnerability ->
-                                    VulnerabilityCause(
-                                        testcase.attributes["name"]?.value?.toModuleString()
-                                            ?: "unknown",
-                                        listOf(
-                                            Vulnerability(
-                                                VulnerabilityType.VulnerabilityName,
-                                                vulnerability)), // TODO determine correct
-                                        // VulnerabilityType
-                                    )
-                                }
-                            }
+      val vulnerabilities =
+          reportJunit.asFileIfExists?.processXml { doc ->
+            doc.children().flatMap { testsuites ->
+              testsuites
+                  .children()
+                  .filter { (it.attributes["failures"]?.value?.toInt() ?: 0) > 0 }
+                  .children()
+                  .mapNotNull { testcase ->
+                    testcase.attributes["classname"]?.value?.let { vulnerability ->
+                      VulnerabilityCause(
+                          testcase.attributes["name"]?.value?.toModuleString() ?: "unknown",
+                          listOf(
+                              Vulnerability(
+                                  VulnerabilityType.VulnerabilityName,
+                                  vulnerability)), // TODO determine correct
+                          // VulnerabilityType
+                      )
                     }
-                }
-
-            logger.debug(
-                "printVulnerabilityCause: starting to process the xml of dependency issues")
-
-            vulnerabilities?.forEach {
-                val causes = resolutionResult.getRequestedParentDependencies(it.moduleString)
-                logger.warn(
-                    "$causes introduced ${it.moduleString} with the ${it.vulnerabilities.map { it.name }}")
+                  }
             }
-        }
+          }
+
+      logger.debug("printVulnerabilityCause: starting to process the xml of dependency issues")
+
+      vulnerabilities?.forEach {
+        val causes = resolutionResult.getRequestedParentDependencies(it.moduleString)
+        logger.warn(
+            "$causes introduced ${it.moduleString} with the ${it.vulnerabilities.map { it.name }}")
+      }
+    }
+  }
+
+  data class VulnerabilityCause(
+      val moduleString: String,
+      val vulnerabilities: List<Vulnerability>,
+  )
+
+  fun ResolutionResult.getRequestedParentDependencies(moduleName: String): String {
+    fun ResolvedComponentResult.findFirstLevelParents(): List<ResolvedComponentResult> {
+      val isRootComponents =
+          selectionReason.descriptions.any { description ->
+            description.cause == ComponentSelectionCause.ROOT
+          }
+      val isFirstLevelComponent =
+          selectionReason.descriptions.any { description ->
+            description.cause == ComponentSelectionCause.REQUESTED
+          }
+
+      if (isRootComponents) {
+        return emptyList()
+      } else if (isFirstLevelComponent) {
+        return listOf(this)
+      } else {
+        return dependents
+            .filter { it.resolvedVariant.attributes.getAttribute(ATTRIBUTE_CATEGORY) != "platform" }
+            .flatMap { it.from.findFirstLevelParents() }
+      }
     }
 
-    data class VulnerabilityCause(
-        val moduleString: String,
-        val vulnerabilities: List<Vulnerability>,
-    )
-
-    fun ResolutionResult.getRequestedParentDependencies(moduleName: String): String {
-        fun ResolvedComponentResult.findFirstLevelParents(): List<ResolvedComponentResult> {
-            val isRootComponents =
-                selectionReason.descriptions.any { description ->
-                    description.cause == ComponentSelectionCause.ROOT
-                }
-            val isFirstLevelComponent =
-                selectionReason.descriptions.any { description ->
-                    description.cause == ComponentSelectionCause.REQUESTED
-                }
-
-            if (isRootComponents) {
-                return emptyList()
-            } else if (isFirstLevelComponent) {
-                return listOf(this)
-            } else {
-                return dependents.filter {
-                        it.resolvedVariant.attributes.getAttribute(ATTRIBUTE_CATEGORY) != "platform"
-                    }.flatMap { it.from.findFirstLevelParents() }
-            }
+    val component =
+        allComponents.first {
+          it.moduleVersion != null &&
+              "${it.moduleVersion?.group}:${it.moduleVersion?.name}:${it.moduleVersion?.version}" ==
+                  moduleName
         }
-
-        val component =
-            allComponents.first {
-                it.moduleVersion != null &&
-                    "${it.moduleVersion?.group}:${it.moduleVersion?.name}:${it.moduleVersion?.version}" ==
-                        moduleName
-            }
-        return component.findFirstLevelParents().joinToString(",") {
-            "${it.moduleVersion?.group}:${it.moduleVersion?.name}:${it.moduleVersion?.version}"
-        }
+    return component.findFirstLevelParents().joinToString(",") {
+      "${it.moduleVersion?.group}:${it.moduleVersion?.name}:${it.moduleVersion?.version}"
     }
+  }
 
-    companion object {
-        val ATTRIBUTE_CATEGORY =
-            org.gradle.api.attributes.Attribute.of("org.gradle.category", String::class.java)
-    }
+  companion object {
+    val ATTRIBUTE_CATEGORY =
+        org.gradle.api.attributes.Attribute.of("org.gradle.category", String::class.java)
+  }
 }

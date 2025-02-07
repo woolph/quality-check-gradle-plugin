@@ -10,7 +10,7 @@ fun <R> File.processXml(
     block: (org.w3c.dom.Document) -> R,
 ): R =
     inputStream().use { inputStream ->
-        block(dbFactory.newDocumentBuilder().parse(InputSource(inputStream)))
+      block(dbFactory.newDocumentBuilder().parse(InputSource(inputStream)))
     }
 
 fun org.w3c.dom.NodeList.asSequence(): Sequence<org.w3c.dom.Node> =

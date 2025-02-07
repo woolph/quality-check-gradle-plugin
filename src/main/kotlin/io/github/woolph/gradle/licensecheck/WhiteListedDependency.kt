@@ -8,10 +8,10 @@ data class WhiteListedDependency(
     val moduleNamePattern: Regex,
     val validUntil: Instant = Instant.DISTANT_FUTURE,
 ) {
-    fun isValid(clock: Clock) = validUntil >= clock.now()
+  fun isValid(clock: Clock) = validUntil >= clock.now()
 
-    fun isExpired(clock: Clock) = !isValid(clock)
+  fun isExpired(clock: Clock) = !isValid(clock)
 
-    override fun toString() =
-        "WhiteListedDependency(moduleNamePattern=$moduleNamePattern, validUntil=$validUntil)"
+  override fun toString() =
+      "WhiteListedDependency(moduleNamePattern=$moduleNamePattern, validUntil=$validUntil)"
 }

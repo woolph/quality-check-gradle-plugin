@@ -31,66 +31,61 @@ import org.gradle.api.tasks.TaskAction
  */
 @CacheableTask
 abstract class CheckSuppressionFileTask : DefaultTask() {
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:Optional
-    abstract val originalSuppressionFile: RegularFileProperty
+  @get:InputFile
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  @get:Optional
+  abstract val originalSuppressionFile: RegularFileProperty
 
-    @get:Input abstract val maxSuppressUntil: Property<Duration>
+  @get:Input abstract val maxSuppressUntil: Property<Duration>
 
-    @get:Input abstract val falsePositivePattern: Property<Regex>
+  @get:Input abstract val falsePositivePattern: Property<Regex>
 
-    @get:Input abstract val today: Property<LocalDate>
+  @get:Input abstract val today: Property<LocalDate>
 
-    @get:OutputFile abstract val suppressionFileCheckResult: RegularFileProperty
+  @get:OutputFile abstract val suppressionFileCheckResult: RegularFileProperty
 
-    init {
-        group = "verification/dependency-check"
+  init {
+    group = "verification/dependency-check"
 
-        maxSuppressUntil.convention(365.days.toJavaDuration())
+    maxSuppressUntil.convention(365.days.toJavaDuration())
 
-        suppressionFileCheckResult.convention(
-            project.layout.buildDirectory.file(
-                "reports/dependency-check/suppression-file-check-result.txt"))
+    suppressionFileCheckResult.convention(
+        project.layout.buildDirectory.file(
+            "reports/dependency-check/suppression-file-check-result.txt"))
 
-        falsePositivePattern.convention(Regex("false[\\s-_]positive", RegexOption.IGNORE_CASE))
+    falsePositivePattern.convention(Regex("false[\\s-_]positive", RegexOption.IGNORE_CASE))
 
-        today.set(LocalDate.now())
-        today.finalizeValue()
-    }
+    today.set(LocalDate.now())
+    today.finalizeValue()
+  }
 
-    @TaskAction
-    fun checkSuppressionFile() {
-        originalSuppressionFile.asFile.orNull?.parseAsDependencyCheckSuppressionFile()?.let {
-            originalSuppressionEntries ->
-            val falsePositivePattern = falsePositivePattern.get()
-            val maxSuppressUntil = maxSuppressUntil.get()
+  @TaskAction
+  fun checkSuppressionFile() {
+    originalSuppressionFile.asFile.orNull?.parseAsDependencyCheckSuppressionFile()?.let {
+        originalSuppressionEntries ->
+      val falsePositivePattern = falsePositivePattern.get()
+      val maxSuppressUntil = maxSuppressUntil.get()
 
-            val inappropriateEntries =
-                originalSuppressionEntries
-                    .filter {
-                        it.notes?.contains(falsePositivePattern) != true &&
-                            it.suppressUntil?.isBefore(
-                                today
-                                    .get()
-                                    .atStartOfDay(ZoneId.systemDefault())
-                                    .plus(maxSuppressUntil)) != true
-                    }
-                    .toList()
+      val inappropriateEntries =
+          originalSuppressionEntries
+              .filter {
+                it.notes?.contains(falsePositivePattern) != true &&
+                    it.suppressUntil?.isBefore(
+                        today.get().atStartOfDay(ZoneId.systemDefault()).plus(maxSuppressUntil)) !=
+                        true
+              }
+              .toList()
 
-            suppressionFileCheckResult
-                .get()
-                .asFile
-                .writeText(inappropriateEntries.joinToString("\n"))
+      suppressionFileCheckResult.get().asFile.writeText(inappropriateEntries.joinToString("\n"))
 
-            if (inappropriateEntries.isNotEmpty()) {
-                inappropriateEntries.forEach {
-                    logger.error(
-                        "the suppression file entry for ${it.packageUrl} (${it.vulnerabilities.joinToString { it.name }}) does neither contain FALSE POSITIVE note nor an appropriate expiration date")
-                }
-                throw GradleException(
-                    "Some entries in the DC suppression file ${originalSuppressionFile.get()} do neither have a FALSE POSITIVE note nor an appropriate expiration date set (at max the suppression expiration should be one year)")
-            }
+      if (inappropriateEntries.isNotEmpty()) {
+        inappropriateEntries.forEach {
+          logger.error(
+              "the suppression file entry for ${it.packageUrl} (${it.vulnerabilities.joinToString { it.name }}) does neither contain FALSE POSITIVE note nor an appropriate expiration date")
         }
+        throw GradleException(
+            "Some entries in the DC suppression file ${originalSuppressionFile.get()} do neither have a FALSE POSITIVE note nor an appropriate expiration date set (at max the suppression expiration should be one year)")
+      }
     }
+  }
 }

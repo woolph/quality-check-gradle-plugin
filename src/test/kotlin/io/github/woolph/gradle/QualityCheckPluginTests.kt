@@ -14,38 +14,37 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
 class QualityCheckPluginTests {
-    companion object {
-        @JvmStatic
-        fun supportedGradleVersions(): Stream<String> = SUPPORTED_GRADLE_VERSIONS.stream()
+  companion object {
+    @JvmStatic fun supportedGradleVersions(): Stream<String> = SUPPORTED_GRADLE_VERSIONS.stream()
 
-        @JvmStatic
-        val SUPPORTED_GRADLE_VERSIONS =
-            listOf(
-                "8.11.1",
-            )
-    }
+    @JvmStatic
+    val SUPPORTED_GRADLE_VERSIONS =
+        listOf(
+            "8.11.1",
+        )
+  }
 
-    @TempDir lateinit var testProjectDir: File
-    lateinit var settingsFile: File
-    lateinit var buildFile: File
+  @TempDir lateinit var testProjectDir: File
+  lateinit var settingsFile: File
+  lateinit var buildFile: File
 
-    @BeforeEach
-    fun setup() {
-        settingsFile = File(testProjectDir, "settings.gradle")
-        buildFile = File(testProjectDir, "build.gradle")
-    }
+  @BeforeEach
+  fun setup() {
+    settingsFile = File(testProjectDir, "settings.gradle")
+    buildFile = File(testProjectDir, "build.gradle")
+  }
 
-    @ParameterizedTest
-    @MethodSource("supportedGradleVersions")
-    fun `project without check or test task`(gradleVersion: String) {
-        settingsFile.writeText(
-            """
+  @ParameterizedTest
+  @MethodSource("supportedGradleVersions")
+  fun `project without check or test task`(gradleVersion: String) {
+    settingsFile.writeText(
+        """
             rootProject.name = 'dependency-check-skip'
             """
-                .trimIndent(),
-        )
-        buildFile.writeText(
-            """
+            .trimIndent(),
+    )
+    buildFile.writeText(
+        """
             plugins {
                 id 'io.github.woolph.quality-check'
             }
@@ -61,33 +60,33 @@ class QualityCheckPluginTests {
                 }
             }
             """
-                .trimIndent(),
-        )
+            .trimIndent(),
+    )
 
-        val result: BuildResult =
-            GradleRunner.create()
-                .withGradleVersion(gradleVersion)
-                .withProjectDir(testProjectDir)
-                .withArguments("build")
-                .withPluginClasspath()
-                .build()
+    val result: BuildResult =
+        GradleRunner.create()
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(testProjectDir)
+            .withArguments("build")
+            .withPluginClasspath()
+            .build()
 
-        println(result.output)
-        assertTrue(result.output.contains("licenseCheck will not be applied due to exception"))
-        assertTrue(result.output.contains("dependencyCheck will not be applied due to exception"))
-    }
+    println(result.output)
+    assertTrue(result.output.contains("licenseCheck will not be applied due to exception"))
+    assertTrue(result.output.contains("dependencyCheck will not be applied due to exception"))
+  }
 
-    @ParameterizedTest
-    @MethodSource("supportedGradleVersions")
-    fun `set dependency check to skip`(gradleVersion: String) {
-        settingsFile.writeText(
-            """
+  @ParameterizedTest
+  @MethodSource("supportedGradleVersions")
+  fun `set dependency check to skip`(gradleVersion: String) {
+    settingsFile.writeText(
+        """
             rootProject.name = 'dependency-check-skip'
             """
-                .trimIndent(),
-        )
-        buildFile.writeText(
-            """
+            .trimIndent(),
+    )
+    buildFile.writeText(
+        """
             plugins {
                 id 'java'
                 id 'io.github.woolph.quality-check'
@@ -104,38 +103,38 @@ class QualityCheckPluginTests {
                 }
             }
             """
-                .trimIndent(),
-        )
+            .trimIndent(),
+    )
 
-        val result: BuildResult =
-            GradleRunner.create()
-                .withGradleVersion(gradleVersion)
-                .withProjectDir(testProjectDir)
-                .withArguments("check")
-                .withPluginClasspath()
-                .build()
+    val result: BuildResult =
+        GradleRunner.create()
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(testProjectDir)
+            .withArguments("check")
+            .withPluginClasspath()
+            .build()
 
-        assertTrue(result.output.contains("licenseCheck is disabled!"))
-        assertTrue(result.output.contains("dependencyCheck is disabled!"))
+    assertTrue(result.output.contains("licenseCheck is disabled!"))
+    assertTrue(result.output.contains("dependencyCheck is disabled!"))
 
-        assertEquals(TaskOutcome.UP_TO_DATE, result.task(":check")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
-        assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
-        println(result.task(":dependencyCheckAnalyze")?.path)
-    }
+    assertEquals(TaskOutcome.UP_TO_DATE, result.task(":check")?.outcome)
+    assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
+    assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
+    assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
+    println(result.task(":dependencyCheckAnalyze")?.path)
+  }
 
-    @ParameterizedTest
-    @MethodSource("supportedGradleVersions")
-    fun `licenseCheck succeeds for allowed license`(gradleVersion: String) {
-        settingsFile.writeText(
-            """
+  @ParameterizedTest
+  @MethodSource("supportedGradleVersions")
+  fun `licenseCheck succeeds for allowed license`(gradleVersion: String) {
+    settingsFile.writeText(
+        """
             rootProject.name = 'licenseCheckOnly'
             """
-                .trimIndent(),
-        )
-        buildFile.writeText(
-            """
+            .trimIndent(),
+    )
+    buildFile.writeText(
+        """
             plugins {
                 id 'java'
                 id 'io.github.woolph.quality-check'
@@ -157,35 +156,35 @@ class QualityCheckPluginTests {
                 }
             }
             """
-                .trimIndent(),
-        )
+            .trimIndent(),
+    )
 
-        val result: BuildResult =
-            GradleRunner.create()
-                .withGradleVersion(gradleVersion)
-                .withProjectDir(testProjectDir)
-                .withArguments("check")
-                .withPluginClasspath()
-                .build()
+    val result: BuildResult =
+        GradleRunner.create()
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(testProjectDir)
+            .withArguments("check")
+            .withPluginClasspath()
+            .build()
 
-        assertEquals(TaskOutcome.SUCCESS, result.task(":check")?.outcome)
-        assertEquals(TaskOutcome.SUCCESS, result.task(":checkLicenses")?.outcome)
-        assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
-        assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
-        println(result.task(":dependencyCheckAnalyze")?.path)
-    }
+    assertEquals(TaskOutcome.SUCCESS, result.task(":check")?.outcome)
+    assertEquals(TaskOutcome.SUCCESS, result.task(":checkLicenses")?.outcome)
+    assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
+    assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
+    println(result.task(":dependencyCheckAnalyze")?.path)
+  }
 
-    @ParameterizedTest
-    @MethodSource("supportedGradleVersions")
-    fun `licenseCheck fails for not allowed license`(gradleVersion: String) {
-        settingsFile.writeText(
-            """
+  @ParameterizedTest
+  @MethodSource("supportedGradleVersions")
+  fun `licenseCheck fails for not allowed license`(gradleVersion: String) {
+    settingsFile.writeText(
+        """
             rootProject.name = 'licenseCheckOnly'
             """
-                .trimIndent(),
-        )
-        buildFile.writeText(
-            """
+            .trimIndent(),
+    )
+    buildFile.writeText(
+        """
             plugins {
                 id 'java'
                 id 'io.github.woolph.quality-check'
@@ -210,21 +209,21 @@ class QualityCheckPluginTests {
                 }
             }
             """
-                .trimIndent(),
-        )
+            .trimIndent(),
+    )
 
-        val result: BuildResult =
-            GradleRunner.create()
-                .withGradleVersion(gradleVersion)
-                .withProjectDir(testProjectDir)
-                .withArguments("check")
-                .withPluginClasspath()
-                .buildAndFail()
+    val result: BuildResult =
+        GradleRunner.create()
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(testProjectDir)
+            .withArguments("check")
+            .withPluginClasspath()
+            .buildAndFail()
 
-        assertEquals(TaskOutcome.FAILED, result.task(":checkLicenses")?.outcome)
-    }
+    assertEquals(TaskOutcome.FAILED, result.task(":checkLicenses")?.outcome)
+  }
 
-    // TODO also test kotlin dsl
+  // TODO also test kotlin dsl
 
-    // TODO test for dependencyCheck
+  // TODO test for dependencyCheck
 }

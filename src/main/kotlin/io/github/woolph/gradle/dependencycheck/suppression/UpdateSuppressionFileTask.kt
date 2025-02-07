@@ -13,44 +13,43 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
 abstract class UpdateSuppressionFileTask : DefaultTask() {
-    @get:InputFile @get:Optional abstract val originalSuppressionFile: RegularFileProperty
+  @get:InputFile @get:Optional abstract val originalSuppressionFile: RegularFileProperty
 
-    @get:OutputFile abstract val suppressionFile: RegularFileProperty
+  @get:OutputFile abstract val suppressionFile: RegularFileProperty
 
-    @get:Input @get:Optional abstract val suppressUntil: Property<ZonedDateTime>
+  @get:Input @get:Optional abstract val suppressUntil: Property<ZonedDateTime>
 
-    @get:Input abstract val desiredZoneId: Property<ZoneId>
+  @get:Input abstract val desiredZoneId: Property<ZoneId>
 
-    init {
-        group = "verification/dependency-check"
+  init {
+    group = "verification/dependency-check"
 
-        suppressionFile.convention(
-            project.layout.projectDirectory.file("dc-suppress-updated.xml"),
-        )
+    suppressionFile.convention(
+        project.layout.projectDirectory.file("dc-suppress-updated.xml"),
+    )
 
-        suppressUntil.convention(
-            project.providers.gradleProperty("suppressUntil").map {
-                SuppressionEntry.parseToZoneDateTime(it)
-            },
-        )
+    suppressUntil.convention(
+        project.providers.gradleProperty("suppressUntil").map {
+          SuppressionEntry.parseToZoneDateTime(it)
+        },
+    )
 
-        desiredZoneId.convention(SuppressionEntry.DEFAULT_ZONE_ID)
+    desiredZoneId.convention(SuppressionEntry.DEFAULT_ZONE_ID)
+  }
+
+  @TaskAction
+  fun updateSuppressionFile() {
+    originalSuppressionFile.asFile.orNull?.parseAsDependencyCheckSuppressionFile()?.let {
+        originalSuppressionEntries ->
+      val suppressUntil = suppressUntil.orNull
+
+      originalSuppressionEntries
+          .map {
+            it.copy(
+                suppressUntil =
+                    if (it.suppressUntil == null) null else (suppressUntil ?: it.suppressUntil))
+          }
+          .writeTo(suppressionFile.asFile.get(), desiredZoneId.get())
     }
-
-    @TaskAction
-    fun updateSuppressionFile() {
-        originalSuppressionFile.asFile.orNull?.parseAsDependencyCheckSuppressionFile()?.let {
-            originalSuppressionEntries ->
-            val suppressUntil = suppressUntil.orNull
-
-            originalSuppressionEntries
-                .map {
-                    it.copy(
-                        suppressUntil =
-                            if (it.suppressUntil == null) null
-                            else (suppressUntil ?: it.suppressUntil))
-                }
-                .writeTo(suppressionFile.asFile.get(), desiredZoneId.get())
-        }
-    }
+  }
 }

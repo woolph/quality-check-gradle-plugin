@@ -7,18 +7,18 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
 abstract class CreateLicenseBundleNormalizerConfigTask : DefaultTask() {
-    @get:OutputFile abstract val additionalLicenseNormalizerBundle: RegularFileProperty
+  @get:OutputFile abstract val additionalLicenseNormalizerBundle: RegularFileProperty
 
-    init {
-        group = "verification/license-check"
-        description = "Create License Bundle Normalizer Config Task"
-    }
+  init {
+    group = "verification/license-check"
+    description = "Create License Bundle Normalizer Config Task"
+  }
 
-    @TaskAction
-    fun createLicenseBundleNormalizerConfigTask() {
-        CreateLicenseBundleNormalizerConfigTask::class
-            .java
-            .getResourceAsStream("/additional-license-normalizer-bundle.json")
-            ?.let { additionalLicenseNormalizerBundle.get().asFile.writeBytes(it.readAllBytes()) }
-    }
+  @TaskAction
+  fun createLicenseBundleNormalizerConfigTask() {
+    CreateLicenseBundleNormalizerConfigTask::class
+        .java
+        .getResourceAsStream("/additional-license-normalizer-bundle.json")
+        ?.let { additionalLicenseNormalizerBundle.get().asFile.writeBytes(it.readAllBytes()) }
+  }
 }
