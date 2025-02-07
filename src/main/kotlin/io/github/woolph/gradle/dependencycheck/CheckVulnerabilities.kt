@@ -102,12 +102,7 @@ abstract class CheckVulnerabilities : DefaultTask() {
     )
 
     fun ResolutionResult.getRequestedParentDependencies(moduleName: String): String {
-        fun ResolvedComponentResult.findFirstLevelParents(
-            depth: Int = 0
-        ): List<ResolvedComponentResult> {
-            repeat(depth) { print("  ") }
-            println(
-                " .... getting first level parents for ${moduleVersion?.group}:${moduleVersion?.name}:${moduleVersion?.version}")
+        fun ResolvedComponentResult.findFirstLevelParents(): List<ResolvedComponentResult> {
             val isRootComponents =
                 selectionReason.descriptions.any { description ->
                     description.cause == ComponentSelectionCause.ROOT
@@ -122,11 +117,9 @@ abstract class CheckVulnerabilities : DefaultTask() {
             } else if (isFirstLevelComponent) {
                 return listOf(this)
             } else {
-                val nonRootParents =
-                    dependents.filter {
+                return dependents.filter {
                         it.resolvedVariant.attributes.getAttribute(ATTRIBUTE_CATEGORY) != "platform"
-                    }
-                return nonRootParents.flatMap { it.from.findFirstLevelParents(depth + 1) }
+                    }.flatMap { it.from.findFirstLevelParents() }
             }
         }
 

@@ -13,7 +13,7 @@ plugins {
 
 group = "io.github.woolph.quality-check"
 
-version = "3.0.0"
+version = "3.0.1-SNAPSHOT"
 
 gradlePlugin {
     website.set("https://github.com/woolph/quality-check-gradle-plugin")
@@ -61,10 +61,10 @@ tasks.withType<Test> { useJUnitPlatform() }
 
 spotless {
     kotlin {
-        ktfmt().dropboxStyle()
+        ktfmt()
         licenseHeader("/* Copyright \$YEAR ENGEL Austria GmbH */")
     }
-    kotlinGradle { ktfmt().dropboxStyle() }
+    kotlinGradle { ktfmt() }
 }
 
 tasks.create("updateReadmeVersions") {
