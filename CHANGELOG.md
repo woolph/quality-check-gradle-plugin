@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fixed warning "[Calling Task.getProject() from a task action](https://docs.gradle.org/8.12.1/userguide/upgrading_version_7.html#task_project)"
 - 
 - using `tasks.register` in favor of `tasks.create` to better support lazy configuration
+- fixed issue that suppression file was not set properly for `checkVulnerabilities` task
 
 ## [3.0.0]()
 ### Fixed

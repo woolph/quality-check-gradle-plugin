@@ -125,34 +125,9 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
               tasks.named(taskName) { group = "verification/dependency-check" }
             }
 
-        //                val dependencyCheckAnalyze =
-        //                    tasks.named<org.owasp.dependencycheck.gradle.tasks.Analyze>(
-        //                        "dependencyCheckAnalyze") {
-        //                            group = "verification/dependency-check"
-        //                            onlyIf { thisExtension.aggregatedSkip.map { !it
-        // }.get() }
-        //
-        //                            finalizedBy(printVulnerabilityCause)
-        //
-        ////
-        // inputs.file(project.layout.projectDirectory.file("gradle.lockfile")).withPathSensitivity(PathSensitivity.RELATIVE)
-        ////                                .withPropertyName("dependencyTree")
-        //
-        // inputs.files(project.configurations.getByName("runtimeClasspath"))
-        //                                .withPropertyName("runtimeClasspath")
-        //                                .withPathSensitivity(PathSensitivity.RELATIVE)
-        //                            inputs.property("today", LocalDate.now())
-        //
-        //                            outputs.cacheIf { true }
-        //
-        // outputs.file(project.layout.buildDirectory.file("reports/dependency-check-junit.xml"))
-        //                                .withPropertyName("reportJunit")
-        //                        }
-        //
-        //                check { dependsOn(dependencyCheckAnalyze) }
-
         val checkVulnerabilities =
             tasks.register<CheckVulnerabilities>("checkVulnerabilities") {
+              suppressionFile.convention(thisExtension.suppressionFile.filterExists())
               dependsOn(checkSuppressionFileTask)
             }
         check { dependsOn(checkVulnerabilities) }
