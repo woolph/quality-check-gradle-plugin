@@ -12,8 +12,9 @@ import java.time.LocalDate
 import kotlin.sequences.forEach
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ResolvedConfiguration
-import org.gradle.api.artifacts.ResolvedDependency
+import org.gradle.api.artifacts.result.ComponentSelectionCause
+import org.gradle.api.artifacts.result.ResolutionResult
+import org.gradle.api.artifacts.result.ResolvedComponentResult
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
@@ -59,10 +60,7 @@ abstract class CheckVulnerabilities : DefaultTask() {
         try {
             dependencyCheckAnalyze.get().analyze()
         } finally {
-            val dependencyCauses =
-                classpath.get().resolvedConfiguration.getDependencyCause().mapKeys {
-                    it.key.module.toString()
-                }
+            val resolutionResult = classpath.get().incoming.resolutionResult
 
             val vulnerabilities =
                 reportJunit.asFileIfExists?.processXml { doc ->
@@ -91,9 +89,9 @@ abstract class CheckVulnerabilities : DefaultTask() {
                 "printVulnerabilityCause: starting to process the xml of dependency issues")
 
             vulnerabilities?.forEach {
-                val cause = dependencyCauses[it.moduleString] ?: emptySet()
+                val causes = resolutionResult.getRequestedParentDependencies(it.moduleString)
                 logger.warn(
-                    "${cause.map { it.module }} introduced ${it.moduleString} with the ${it.vulnerabilities.map { it.name }}")
+                    "$causes introduced ${it.moduleString} with the ${it.vulnerabilities.map { it.name }}")
             }
         }
     }
@@ -103,24 +101,48 @@ abstract class CheckVulnerabilities : DefaultTask() {
         val vulnerabilities: List<Vulnerability>,
     )
 
-    fun ResolvedConfiguration.getDependencyCause():
-        Map<ResolvedDependency, Set<ResolvedDependency>> {
-        return sequence {
-                firstLevelModuleDependencies.forEach { causingDependency ->
-                    causingDependency.children.forEach { addChildren(it, causingDependency) }
+    fun ResolutionResult.getRequestedParentDependencies(moduleName: String): String {
+        fun ResolvedComponentResult.findFirstLevelParents(
+            depth: Int = 0
+        ): List<ResolvedComponentResult> {
+            repeat(depth) { print("  ") }
+            println(
+                " .... getting first level parents for ${moduleVersion?.group}:${moduleVersion?.name}:${moduleVersion?.version}")
+            val isRootComponents =
+                selectionReason.descriptions.any { description ->
+                    description.cause == ComponentSelectionCause.ROOT
                 }
+            val isFirstLevelComponent =
+                selectionReason.descriptions.any { description ->
+                    description.cause == ComponentSelectionCause.REQUESTED
+                }
+
+            if (isRootComponents) {
+                return emptyList()
+            } else if (isFirstLevelComponent) {
+                return listOf(this)
+            } else {
+                val nonRootParents =
+                    dependents.filter {
+                        it.resolvedVariant.attributes.getAttribute(ATTRIBUTE_CATEGORY) != "platform"
+                    }
+                return nonRootParents.flatMap { it.from.findFirstLevelParents(depth + 1) }
             }
-            .groupBy(
-                Pair<ResolvedDependency, ResolvedDependency>::first,
-                Pair<ResolvedDependency, ResolvedDependency>::second)
-            .mapValues { it.value.toSet() }
+        }
+
+        val component =
+            allComponents.first {
+                it.moduleVersion != null &&
+                    "${it.moduleVersion?.group}:${it.moduleVersion?.name}:${it.moduleVersion?.version}" ==
+                        moduleName
+            }
+        return component.findFirstLevelParents().joinToString(",") {
+            "${it.moduleVersion?.group}:${it.moduleVersion?.name}:${it.moduleVersion?.version}"
+        }
     }
 
-    suspend fun SequenceScope<Pair<ResolvedDependency, ResolvedDependency>>.addChildren(
-        childDependency: ResolvedDependency,
-        causingDependency: ResolvedDependency
-    ) {
-        yield(childDependency to causingDependency)
-        childDependency.children.forEach { addChildren(it, causingDependency) }
+    companion object {
+        val ATTRIBUTE_CATEGORY =
+            org.gradle.api.attributes.Attribute.of("org.gradle.category", String::class.java)
     }
 }

@@ -19,6 +19,7 @@ import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.invoke
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.property
+import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.setProperty
 
 abstract class LicenseCheckExtension @Inject constructor(project: Project) : Skipable {
@@ -147,7 +148,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                 }
 
                 val createLicenseBundleNormalizerConfig =
-                    tasks.create<CreateLicenseBundleNormalizerConfigTask>(
+                    tasks.register<CreateLicenseBundleNormalizerConfigTask>(
                         "createLicenseBundleNormalizerConfig") {
                             this.additionalLicenseNormalizerBundle.set(
                                 additonalLicenseNormalizerBundle)
@@ -163,14 +164,15 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                         )
                         inputs
                             .file(
-                                createLicenseBundleNormalizerConfig
-                                    .additionalLicenseNormalizerBundle)
+                                createLicenseBundleNormalizerConfig.flatMap {
+                                    it.additionalLicenseNormalizerBundle
+                                })
                             .withPathSensitivity(PathSensitivity.RELATIVE)
                             .withPropertyName("additionalLicenseNormalizerBundle")
                     }
 
                 val checkLicense =
-                    tasks.create<CheckLicenseTaskJunitReport>("checkLicenses") {
+                    tasks.register<CheckLicenseTaskJunitReport>("checkLicenses") {
                         //                val checkLicense =
                         // tasks.replace<CheckLicenseTaskJunitReport>("checkLicense",
                         // CheckLicenseTaskJunitReport::class.java) {
@@ -275,8 +277,9 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                                     WhiteListedDependencyFilter(logger, whiteListedDependencies),
                                     MissingModuleDataDependencyFilter(),
                                     OnDemandBundleNormalizerFilter(
-                                        createLicenseBundleNormalizerConfig
-                                            .additionalLicenseNormalizerBundle,
+                                        createLicenseBundleNormalizerConfig.flatMap {
+                                            it.additionalLicenseNormalizerBundle
+                                        },
                                     ),
                                 )
                         }

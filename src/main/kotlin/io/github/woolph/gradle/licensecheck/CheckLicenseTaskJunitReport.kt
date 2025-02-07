@@ -40,9 +40,6 @@ abstract class CheckLicenseTaskJunitReport : DefaultTask() {
 
     @TaskAction
     fun checkLicense() {
-        logger.info("Startup CheckLicense for ${project.name}")
-        logger.info("Check licenses if they are allowed to use.")
-
         tmpDirectory.asFile.get().mkdirs()
         val checkResult = tmpDirectory.file(NOT_PASSED_DEPENDENCIES_FILE).get().asFile
         val allowedLicensesFileLocation = tmpDirectory.file("allowedLicensesFile").get().asFile

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased/Upcoming
 
+## [3.0.1]() 
+### Fixed
+- fixed warning "[Calling Task.getProject() from a task action](https://docs.gradle.org/8.12.1/userguide/upgrading_version_7.html#task_project)"
+- 
+- using `tasks.register` in favor of `tasks.create` to better support lazy configuration
+
 ## [3.0.0]()
 ### Fixed
 - fixed wrong classpath fingerprint/cache key calculation for subprojects by introducing a new task named `checkVulnerability` encapsulating the `dependencyCheckAnalyze` task (it also integrates the `printVulnerabilityCause` task, which is therefore obsolete)

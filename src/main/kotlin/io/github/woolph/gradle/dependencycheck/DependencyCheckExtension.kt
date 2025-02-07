@@ -95,14 +95,14 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                 plugins.apply("org.owasp.dependencycheck")
 
                 val checkSuppressionFileTask =
-                    tasks.create<CheckSuppressionFileTask>("checkSuppressionFile") {
+                    tasks.register<CheckSuppressionFileTask>("checkSuppressionFile") {
                         group = "verification/dependency-check"
 
                         originalSuppressionFile.convention(thisExtension.suppressionFile)
                         onlyIf { thisExtension.suppressionFile.asFile.get().exists() }
                     }
 
-                tasks.create<GenerateSuppressionFileTask>("generateSuppressionFile") {
+                tasks.register<GenerateSuppressionFileTask>("generateSuppressionFile") {
                     originalSuppressionFile.convention(thisExtension.suppressionFile.filterExists())
                     suppressionFile.convention(
                         makeSibling(thisExtension.suppressionFile) {
@@ -110,7 +110,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
                         })
                 }
 
-                tasks.create<UpdateSuppressionFileTask>("updateSuppressionFile") {
+                tasks.register<UpdateSuppressionFileTask>("updateSuppressionFile") {
                     originalSuppressionFile.convention(thisExtension.suppressionFile.filterExists())
                     suppressionFile.convention(
                         makeSibling(thisExtension.suppressionFile) {
