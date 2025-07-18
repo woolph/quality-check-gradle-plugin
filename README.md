@@ -1,24 +1,21 @@
 # quality-check-gradle-plugin
 
+
+[![Gradle plugin](https://img.shields.io/badge/plugins.gradle.org-io.github.woolph.quality--check-blue.svg)](https://plugins.gradle.org/plugin/io.github.woolph.quality-check)
+[![Changelog](https://img.shields.io/badge/changelog-3.0.1-blue.svg)](CHANGELOG.md)
+
 `quality-check` is a gradle plugin which adds and preconfigures other plugins which are essential to ensure code quality
 and security.
 
 ## Quick setup
 Add the plugin with the id `io.github.woolph.quality-check` to your gradle build:
 
->####Kotlin DSL Sample *build.gradle.kts*
->```kotlin
->plugins {
->    id("io.github.woolph.quality-check") version "2.2.1"
->}
->```
+```kotlin
+plugins {
+    id("io.github.woolph.quality-check") version "3.0.1"
+}
+```
 
->####Groovy DSL Sample *build.gradle*
->```groovy
->plugins {
->    id 'io.github.woolph.quality-check' version '2.2.1'
->}
->```
 
 ## What does it do?
 The quality check adds several other plugins to your gradle build with the intent to ensure code quality and code 
