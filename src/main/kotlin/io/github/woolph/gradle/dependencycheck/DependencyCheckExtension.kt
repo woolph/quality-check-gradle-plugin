@@ -69,7 +69,7 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
           parent.file(fileNamePattern(actualFile.asFile))
         }
 
-    internal fun <T> Provider<T>.filter2(predicate: (T) -> Boolean): Provider<T> = flatMap {
+    internal fun <T: Any> Provider<T>.filter2(predicate: (T) -> Boolean): Provider<T> = flatMap {
       if (predicate(it)) {
         this
       } else {
@@ -138,6 +138,11 @@ abstract class DependencyCheckExtension @Inject constructor(project: Project) : 
           if (aggregatedSkip) {
             logger.warn("dependencyCheck is disabled!")
           }
+
+          checkVulnerabilities.configure {
+            onlyIf { !aggregatedSkip }
+          }
+
 
           extensions
               .getByName<org.owasp.dependencycheck.gradle.extension.DependencyCheckExtension>(

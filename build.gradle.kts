@@ -13,7 +13,7 @@ plugins {
 
 group = "io.github.woolph.quality-check"
 
-version = "3.0.1"
+version = "3.0.2"
 
 gradlePlugin {
   website.set("https://github.com/woolph/quality-check-gradle-plugin")
@@ -45,8 +45,10 @@ dependencies {
 
   // region unit test dependencies
   testImplementation(gradleTestKit())
+  testImplementation(platform(libs.test.junit.bom))
   testImplementation(libs.test.junit.params)
   testRuntimeOnly(libs.test.junit.engine)
+  testRuntimeOnly(libs.test.junit.launcher)
   // endregion
 }
 
@@ -57,7 +59,7 @@ java {
   withJavadocJar()
 }
 
-tasks.withType<Test> { useJUnitPlatform() }
+tasks.test { useJUnitPlatform() }
 
 spotless {
   kotlin {

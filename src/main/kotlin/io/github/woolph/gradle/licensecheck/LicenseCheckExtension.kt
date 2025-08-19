@@ -7,8 +7,8 @@ import com.github.jk1.license.render.SimpleHtmlReportRenderer
 import com.github.jk1.license.task.CheckLicenseTask
 import io.github.woolph.gradle.Skipable
 import javax.inject.Inject
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
@@ -21,7 +21,9 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.setProperty
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 abstract class LicenseCheckExtension @Inject constructor(project: Project) : Skipable {
   override val skip = project.objects.property<Boolean>().convention(false)
 

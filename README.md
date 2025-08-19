@@ -12,7 +12,7 @@ Add the plugin with the id `io.github.woolph.quality-check` to your gradle build
 
 ```kotlin
 plugins {
-    id("io.github.woolph.quality-check") version "3.0.1"
+    id("io.github.woolph.quality-check") version "3.0.2"
 }
 ```
 
@@ -20,8 +20,8 @@ plugins {
 ## What does it do?
 The quality check adds several other plugins to your gradle build with the intent to ensure code quality and code 
 security. More precisely, it adds the following plugins:
-* `org.owasp:dependency-check-gradle:10.0.4` which checks your 3rd party dependencies for known vulnerabilities
-* `com.github.jk1:gradle-license-report:2.7` which checks the licenses of your 3rd party dependencies
+* `org.owasp:dependency-check-gradle:12.1.3` which checks your 3rd party dependencies for known vulnerabilities
+* `com.github.jk1:gradle-license-report:2.9` which checks the licenses of your 3rd party dependencies
 
 Your gradle build is automatically configured in a way that the `check` of your build depends upon 
 all the relevant tasks introduced by these plugins. Here is what it would look like, if you'd have to do this
@@ -84,7 +84,7 @@ anew), by providing a database for the plugin to be used. You can do so by setti
 
 * `DEPENDENCY_CHECK_DB_DRIVER` is the full-qualified name of the jdbc driver (the following drivers are readily 
 available in the classpath of this gradle plugin:)
-  * `org.postgresql.Driver` (from `org.postgresql:postgresql:42.4.0`)
+  * `org.postgresql.Driver` (from `org.postgresql:postgresql:42.7.7`)
   * `com.microsoft.sqlserver.jdbc.SQLServerDriver` (from `com.microsoft.sqlserver:mssql-jdbc:12.2.0.jre11`)
 * `DEPENDENCY_CHECK_DB_CONNECTION` is a jdbc string for accessing the database
 * `DEPENDENCY_CHECK_DB_USER`

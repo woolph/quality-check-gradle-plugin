@@ -80,7 +80,7 @@ class DependencyCheckTests {
     assertTrue(result.output.contains("dependencyCheck is disabled!"))
 
     assertEquals(TaskOutcome.UP_TO_DATE, result.task(":check")?.outcome)
-    assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
+    assertEquals(TaskOutcome.SKIPPED, result.task(":checkVulnerabilities")?.outcome)
     assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
     assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
     println(result.task(":dependencyCheckAnalyze")?.path)
@@ -123,7 +123,7 @@ class DependencyCheckTests {
     assertTrue(result.output.contains("dependencyCheck is disabled!"))
 
     assertEquals(TaskOutcome.UP_TO_DATE, result.task(":check")?.outcome)
-    assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
+    assertEquals(TaskOutcome.SKIPPED, result.task(":checkVulnerabilities")?.outcome)
     assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
     assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
     println(result.task(":dependencyCheckAnalyze")?.path)
@@ -170,7 +170,7 @@ class DependencyCheckTests {
     assertTrue(result.output.contains("dependencyCheck is disabled!"))
 
     assertEquals(TaskOutcome.UP_TO_DATE, result.task(":check")?.outcome)
-    assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
+    assertEquals(TaskOutcome.SKIPPED, result.task(":checkVulnerabilities")?.outcome)
     assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
     assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
     println(result.task(":dependencyCheckAnalyze")?.path)
@@ -213,7 +213,7 @@ class DependencyCheckTests {
             .build()
 
     assertEquals(TaskOutcome.SUCCESS, result.task(":check")?.outcome)
-    assertEquals(TaskOutcome.SUCCESS, result.task(":dependencyCheckAnalyze")?.outcome)
+    assertEquals(TaskOutcome.SUCCESS, result.task(":checkVulnerabilities")?.outcome)
     assertEquals(TaskOutcome.SKIPPED, result.task(":checkSuppressionFile")?.outcome)
     assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
     assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
@@ -269,7 +269,7 @@ class DependencyCheckTests {
             .build()
 
     assertEquals(TaskOutcome.SUCCESS, result.task(":check")?.outcome)
-    assertEquals(TaskOutcome.SUCCESS, result.task(":dependencyCheckAnalyze")?.outcome)
+    assertEquals(TaskOutcome.SUCCESS, result.task(":checkVulnerabilities")?.outcome)
     assertEquals(TaskOutcome.SUCCESS, result.task(":checkSuppressionFile")?.outcome)
     assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
     assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)

@@ -20,7 +20,9 @@ class QualityCheckPluginTests {
     @JvmStatic
     val SUPPORTED_GRADLE_VERSIONS =
         listOf(
-            "8.11.1",
+            "9.0.0",
+            "8.14.3",
+            "7.6.6",
         )
   }
 
@@ -69,11 +71,10 @@ class QualityCheckPluginTests {
             .withProjectDir(testProjectDir)
             .withArguments("build")
             .withPluginClasspath()
-            .build()
+            .buildAndFail()
 
     println(result.output)
-    assertTrue(result.output.contains("licenseCheck will not be applied due to exception"))
-    assertTrue(result.output.contains("dependencyCheck will not be applied due to exception"))
+    assertTrue(result.output.contains("FAILURE: Build failed with an exception."))
   }
 
   @ParameterizedTest
@@ -118,7 +119,7 @@ class QualityCheckPluginTests {
     assertTrue(result.output.contains("dependencyCheck is disabled!"))
 
     assertEquals(TaskOutcome.UP_TO_DATE, result.task(":check")?.outcome)
-    assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
+    assertEquals(TaskOutcome.SKIPPED, result.task(":checkVulnerabilities")?.outcome)
     assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
     assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
     println(result.task(":dependencyCheckAnalyze")?.path)
@@ -169,7 +170,7 @@ class QualityCheckPluginTests {
 
     assertEquals(TaskOutcome.SUCCESS, result.task(":check")?.outcome)
     assertEquals(TaskOutcome.SUCCESS, result.task(":checkLicenses")?.outcome)
-    assertEquals(TaskOutcome.SKIPPED, result.task(":dependencyCheckAnalyze")?.outcome)
+    assertEquals(TaskOutcome.SKIPPED, result.task(":checkVulnerabilities")?.outcome)
     assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
     println(result.task(":dependencyCheckAnalyze")?.path)
   }
