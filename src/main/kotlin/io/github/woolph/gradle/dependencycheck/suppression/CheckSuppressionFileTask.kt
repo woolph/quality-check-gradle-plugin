@@ -40,7 +40,10 @@ abstract class CheckSuppressionFileTask : DefaultTask() {
 
   @get:Input abstract val falsePositivePattern: Property<Regex>
 
-  @get:Input abstract val today: Property<LocalDate> // FIXME LocalDate causes issues with configuration-cache due to unallowed reflective access
+  @get:Input
+  abstract val today:
+      Property<LocalDate> // FIXME LocalDate causes issues with configuration-cache due to unallowed
+  // reflective access
 
   @get:OutputFile abstract val suppressionFileCheckResult: RegularFileProperty
 

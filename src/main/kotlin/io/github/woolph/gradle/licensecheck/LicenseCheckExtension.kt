@@ -8,6 +8,7 @@ import com.github.jk1.license.task.CheckLicenseTask
 import io.github.woolph.gradle.Skipable
 import javax.inject.Inject
 import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -21,7 +22,6 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.setProperty
-import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 abstract class LicenseCheckExtension @Inject constructor(project: Project) : Skipable {
@@ -146,7 +146,7 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
             "checkLicensePreparation") {
               group = "verification/license-check"
               onlyIf { false } // skip this task cause it only adds a renderer
-        }
+            }
 
         val createLicenseBundleNormalizerConfig =
             tasks.register<CreateLicenseBundleNormalizerConfigTask>(
