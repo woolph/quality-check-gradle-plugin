@@ -4,119 +4,118 @@ import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.memberFunctions
 
 plugins {
-    `kotlin-dsl`
-    `maven-publish`
-    alias(libs.plugins.pluginPublish)
+  `kotlin-dsl`
+  `maven-publish`
+  alias(libs.plugins.pluginPublish)
 
-    alias(libs.plugins.spotless)
-    //    kotlin("jvm")
+  alias(libs.plugins.spotless)
 }
 
 group = "io.github.woolph.quality-check"
 
-version = "2.1.0"
+version = "3.0.2"
 
 gradlePlugin {
-    website.set("https://github.com/woolph/quality-check-gradle-plugin")
-    vcsUrl.set("https://github.com/woolph/quality-check-gradle-plugin")
-    plugins {
-        create("quality-check") {
-            id = "io.github.woolph.quality-check"
-            implementationClass = "io.github.woolph.gradle.QualityCheckPlugin"
-            displayName = "ENGEL Quality Check"
-            description = "Adds dependency check and license check to your build."
-            tags.set(listOf("code quality", "security"))
-        }
+  website.set("https://github.com/woolph/quality-check-gradle-plugin")
+  vcsUrl.set("https://github.com/woolph/quality-check-gradle-plugin")
+  plugins {
+    create("quality-check") {
+      id = "io.github.woolph.quality-check"
+      implementationClass = "io.github.woolph.gradle.QualityCheckPlugin"
+      displayName = "ENGEL Quality Check"
+      description = "Adds dependency check and license check to your build."
+      tags.set(listOf("code quality", "security"))
     }
+  }
 }
 
 repositories {
-    maven(url = "https://plugins.gradle.org/m2/")
-    mavenCentral()
+  maven(url = "https://plugins.gradle.org/m2/")
+  mavenCentral()
 }
 
 dependencies {
-    implementation(libs.dependencyCheck)
-    implementation(libs.licenseReport)
-    implementation(libs.kotlinxDatetime)
-    implementation(libs.kotlinxSerialization.json)
+  implementation(libs.dependencyCheck)
+  implementation(libs.licenseReport)
+  implementation(libs.kotlinxDatetime)
+  implementation(libs.kotlinxSerialization.json)
 
-    runtimeOnly(libs.databaseDrivers.postgres)
-    runtimeOnly(libs.databaseDrivers.mssql)
+  runtimeOnly(libs.databaseDrivers.postgres)
+  runtimeOnly(libs.databaseDrivers.mssql)
 
-    // region unit test dependencies
-    testImplementation(gradleTestKit())
-    testImplementation(libs.test.junit.params)
-    testRuntimeOnly(libs.test.junit.engine)
-    // endregion
-    //    implementation(kotlin("stdlib-jdk8"))
+  // region unit test dependencies
+  testImplementation(gradleTestKit())
+  testImplementation(platform(libs.test.junit.bom))
+  testImplementation(libs.test.junit.params)
+  testRuntimeOnly(libs.test.junit.engine)
+  testRuntimeOnly(libs.test.junit.launcher)
+  // endregion
 }
 
 kotlin { jvmToolchain(libs.versions.jvmTarget.map { it.toInt() }.get()) }
 
 java {
-    withSourcesJar()
-    withJavadocJar()
+  withSourcesJar()
+  withJavadocJar()
 }
 
-tasks.withType<Test> { useJUnitPlatform() }
+tasks.test { useJUnitPlatform() }
 
 spotless {
-    kotlin {
-        ktfmt().dropboxStyle()
-        licenseHeader("/* Copyright \$YEAR ENGEL Austria GmbH */")
-    }
-    kotlinGradle { ktfmt().dropboxStyle() }
+  kotlin {
+    ktfmt()
+    licenseHeader("/* Copyright \$YEAR ENGEL Austria GmbH */")
+  }
+  kotlinGradle { ktfmt() }
 }
 
-tasks.create("updateReadmeVersions") {
-    val readmeFile = layout.projectDirectory.file("README.md")
+tasks.register("updateReadmeVersions") {
+  val readmeFile = layout.projectDirectory.file("README.md")
 
-    inputs.file(readmeFile)
-    inputs.property("version", version)
-    outputs.file(readmeFile)
+  inputs.file(readmeFile)
+  inputs.property("version", version)
+  outputs.file(readmeFile)
 
-    doFirst {
-        val readmeContent = readmeFile.asFile.readText()
+  doFirst {
+    val readmeContent = readmeFile.asFile.readText()
 
-        val versionPatternString = "\\d+(\\.\\w+)*(-\\w+(\\.\\w+)*)?"
-        val versionPattern = Regex("(?<=:)$versionPatternString")
-        val replacements =
-            concat(
-                project.extensions.findByType<GradlePluginDevelopmentExtension>()?.let {
-                    it.plugins.asSequence().flatMap { plugin ->
-                        sequenceOf(
-                            Regex(
-                                "id\\(\"${Regex.escape(plugin.id)}\"\\) version \"$versionPatternString\"") to
-                                "id(\"${plugin.id}\") version \"$version\"",
-                            Regex(
-                                "id '${Regex.escape(plugin.id)}' version '$versionPatternString'") to
-                                "id '${plugin.id}' version '$version'",
-                        )
-                    }
-                } ?: emptySequence(),
-                project.extensions.findByName("libs")?.let { libs ->
-                    libs
-                        .libSequence()
-                        .map { it.toString() }
-                        .map { dependencyString ->
-                            val dependencyStringWithoutVersion =
-                                dependencyString.replace(versionPattern, "")
-                            Regex(
-                                "${Regex.escape(dependencyStringWithoutVersion)}($versionPatternString)?") to
-                                dependencyString
-                        }
-                } ?: emptySequence(),
-            )
-
-        readmeFile.asFile.writeText(
-            replacements
-                .onEach { println(it) }
-                .fold(readmeContent) { currentReadmeContent, (pattern, replacement) ->
-                    currentReadmeContent.replace(pattern, replacement)
-                },
+    val versionPatternString = "\\d+(\\.\\w+)*(-\\w+(\\.\\w+)*)?"
+    val versionPattern = Regex("(?<=:)$versionPatternString")
+    val replacements =
+        concat(
+            project.extensions.findByType<GradlePluginDevelopmentExtension>()?.let {
+              it.plugins.asSequence().flatMap { plugin ->
+                sequenceOf(
+                    Regex(
+                        "id\\(\"${Regex.escape(plugin.id)}\"\\) version \"$versionPatternString\"") to
+                        "id(\"${plugin.id}\") version \"$version\"",
+                    Regex("id '${Regex.escape(plugin.id)}' version '$versionPatternString'") to
+                        "id '${plugin.id}' version '$version'",
+                )
+              }
+            } ?: emptySequence(),
+            project.extensions.findByName("libs")?.let { libs ->
+              libs
+                  .libSequence()
+                  .map { it.toString() }
+                  .map { dependencyString ->
+                    val dependencyStringWithoutVersion =
+                        dependencyString.replace(versionPattern, "")
+                    Regex(
+                        "${Regex.escape(dependencyStringWithoutVersion)}($versionPatternString)?") to
+                        dependencyString
+                  }
+            } ?: emptySequence(),
         )
-    }
+
+    readmeFile.asFile.writeText(
+        replacements
+            .onEach { println(it) }
+            .fold(readmeContent) { currentReadmeContent, (pattern, replacement) ->
+              currentReadmeContent.replace(pattern, replacement)
+            },
+    )
+  }
 }
 
 fun <T> concat(vararg sequences: Sequence<T>): Sequence<T> = sequenceOf(*sequences).flatMap { it }
@@ -127,19 +126,17 @@ val subDependencyFactoryType =
         .createType()
 
 fun Any.libSequence(): Sequence<MinimalExternalModuleDependency> {
-    val memberFunctions = this::class.memberFunctions
+  val memberFunctions = this::class.memberFunctions
 
-    return concat(
-        memberFunctions
-            .asSequence()
-            .filter { it.parameters.size == 1 && it.returnType.isSubtypeOf(providerType) }
-            .map { (it.call(this) as Provider<*>).get() }
-            .filterIsInstance<MinimalExternalModuleDependency>(),
-        memberFunctions
-            .asSequence()
-            .filter {
-                it.parameters.size == 1 && it.returnType.isSubtypeOf(subDependencyFactoryType)
-            }
-            .flatMap { it.call(this)?.libSequence() ?: emptySequence() },
-    )
+  return concat(
+      memberFunctions
+          .asSequence()
+          .filter { it.parameters.size == 1 && it.returnType.isSubtypeOf(providerType) }
+          .map { (it.call(this) as Provider<*>).get() }
+          .filterIsInstance<MinimalExternalModuleDependency>(),
+      memberFunctions
+          .asSequence()
+          .filter { it.parameters.size == 1 && it.returnType.isSubtypeOf(subDependencyFactoryType) }
+          .flatMap { it.call(this)?.libSequence() ?: emptySequence() },
+  )
 }

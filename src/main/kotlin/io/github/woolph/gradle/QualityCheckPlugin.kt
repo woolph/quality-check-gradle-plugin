@@ -12,26 +12,23 @@ import org.gradle.kotlin.dsl.named
 
 @Suppress("unused")
 class QualityCheckPlugin : Plugin<Project> {
-    private lateinit var qualityCheckExtension: QualityCheckExtension
-    private lateinit var dependencyCheckExtension: DependencyCheckExtension
-    private lateinit var licenseCheckExtension: LicenseCheckExtension
+  private lateinit var qualityCheckExtension: QualityCheckExtension
+  private lateinit var dependencyCheckExtension: DependencyCheckExtension
+  private lateinit var licenseCheckExtension: LicenseCheckExtension
 
-    override fun apply(project: Project) {
-        project.run {
-            plugins.apply("jacoco")
+  override fun apply(project: Project) {
+    project.run {
+      plugins.apply("jacoco")
 
-            val jacocoTestReport = tasks.named<org.gradle.testing.jacoco.tasks.JacocoReport>("jacocoTestReport") {
-                reports {
-                    xml.required.set(true)
-                }
-            }
-            tasks.named<org.gradle.api.tasks.testing.Test>("test") {
-                finalizedBy(jacocoTestReport)
-            }
+      val jacocoTestReport =
+          tasks.named<org.gradle.testing.jacoco.tasks.JacocoReport>("jacocoTestReport") {
+            reports { xml.required.set(true) }
+          }
+      tasks.named<org.gradle.api.tasks.testing.Test>("test") { finalizedBy(jacocoTestReport) }
 
-            qualityCheckExtension = extensions.create("qualityCheck", QualityCheckExtension::class)
-            applyDependencyCheckExtension(qualityCheckExtension)
-            applyLicenseCheckExtension(qualityCheckExtension)
-        }
+      qualityCheckExtension = extensions.create("qualityCheck", QualityCheckExtension::class)
+      applyDependencyCheckExtension(qualityCheckExtension)
+      applyLicenseCheckExtension(qualityCheckExtension)
     }
+  }
 }
