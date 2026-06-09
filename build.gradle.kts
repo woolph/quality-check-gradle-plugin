@@ -1,19 +1,16 @@
-import kotlin.reflect.KTypeProjection
-import kotlin.reflect.full.createType
-import kotlin.reflect.full.isSubtypeOf
-import kotlin.reflect.full.memberFunctions
+import org.gradle.plugin.compatibility.compatibility
 
 plugins {
   `kotlin-dsl`
   `maven-publish`
+  jacoco
   alias(libs.plugins.pluginPublish)
-
   alias(libs.plugins.spotless)
 }
 
 group = "io.github.woolph.quality-check"
 
-version = "3.0.2"
+version = "3.1.0"
 
 gradlePlugin {
   website.set("https://github.com/woolph/quality-check-gradle-plugin")
@@ -25,6 +22,12 @@ gradlePlugin {
       displayName = "ENGEL Quality Check"
       description = "Adds dependency check and license check to your build."
       tags.set(listOf("code quality", "security"))
+
+      compatibility { // extension added by the Compatibility plugin
+        features {
+          configurationCache = true // or false if the feature isn't supported
+        }
+      }
     }
   }
 }
@@ -59,84 +62,16 @@ java {
   withJavadocJar()
 }
 
-tasks.test { useJUnitPlatform() }
+tasks.test {
+  useJUnitPlatform()
+  finalizedBy(tasks.jacocoTestReport)
+}
 
 spotless {
   kotlin {
+    ratchetFrom("origin/main")
     ktfmt()
     licenseHeader("/* Copyright \$YEAR ENGEL Austria GmbH */")
   }
   kotlinGradle { ktfmt() }
-}
-
-tasks.register("updateReadmeVersions") {
-  val readmeFile = layout.projectDirectory.file("README.md")
-
-  inputs.file(readmeFile)
-  inputs.property("version", version)
-  outputs.file(readmeFile)
-
-  doFirst {
-    val readmeContent = readmeFile.asFile.readText()
-
-    val versionPatternString = "\\d+(\\.\\w+)*(-\\w+(\\.\\w+)*)?"
-    val versionPattern = Regex("(?<=:)$versionPatternString")
-    val replacements =
-        concat(
-            project.extensions.findByType<GradlePluginDevelopmentExtension>()?.let {
-              it.plugins.asSequence().flatMap { plugin ->
-                sequenceOf(
-                    Regex(
-                        "id\\(\"${Regex.escape(plugin.id)}\"\\) version \"$versionPatternString\"") to
-                        "id(\"${plugin.id}\") version \"$version\"",
-                    Regex("id '${Regex.escape(plugin.id)}' version '$versionPatternString'") to
-                        "id '${plugin.id}' version '$version'",
-                )
-              }
-            } ?: emptySequence(),
-            project.extensions.findByName("libs")?.let { libs ->
-              libs
-                  .libSequence()
-                  .map { it.toString() }
-                  .map { dependencyString ->
-                    val dependencyStringWithoutVersion =
-                        dependencyString.replace(versionPattern, "")
-                    Regex(
-                        "${Regex.escape(dependencyStringWithoutVersion)}($versionPatternString)?") to
-                        dependencyString
-                  }
-            } ?: emptySequence(),
-        )
-
-    readmeFile.asFile.writeText(
-        replacements
-            .onEach { println(it) }
-            .fold(readmeContent) { currentReadmeContent, (pattern, replacement) ->
-              currentReadmeContent.replace(pattern, replacement)
-            },
-    )
-  }
-}
-
-fun <T> concat(vararg sequences: Sequence<T>): Sequence<T> = sequenceOf(*sequences).flatMap { it }
-
-val providerType = Provider::class.createType(listOf(KTypeProjection.STAR))
-val subDependencyFactoryType =
-    org.gradle.api.internal.catalog.AbstractExternalDependencyFactory.SubDependencyFactory::class
-        .createType()
-
-fun Any.libSequence(): Sequence<MinimalExternalModuleDependency> {
-  val memberFunctions = this::class.memberFunctions
-
-  return concat(
-      memberFunctions
-          .asSequence()
-          .filter { it.parameters.size == 1 && it.returnType.isSubtypeOf(providerType) }
-          .map { (it.call(this) as Provider<*>).get() }
-          .filterIsInstance<MinimalExternalModuleDependency>(),
-      memberFunctions
-          .asSequence()
-          .filter { it.parameters.size == 1 && it.returnType.isSubtypeOf(subDependencyFactoryType) }
-          .flatMap { it.call(this)?.libSequence() ?: emptySequence() },
-  )
 }

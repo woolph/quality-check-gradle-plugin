@@ -1,4 +1,4 @@
-/* Copyright 2023 ENGEL Austria GmbH */
+/* Copyright 2023-2026 ENGEL Austria GmbH */
 package io.github.woolph.gradle.licensecheck
 
 import com.github.jk1.license.check.LicenseChecker
@@ -10,12 +10,15 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.SetProperty
+import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
+@CacheableTask
 abstract class CheckLicenseTaskJunitReport : DefaultTask() {
   companion object {
     const val PROJECT_JSON_FOR_LICENSE_CHECKING_FILE =
@@ -25,7 +28,7 @@ abstract class CheckLicenseTaskJunitReport : DefaultTask() {
 
   @get:Input abstract val allowedLicenses: SetProperty<String>
 
-  @get:InputFile abstract val projectDependenciesData: RegularFileProperty
+  @get:InputFile @get:Classpath abstract val projectDependenciesData: RegularFileProperty
 
   @get:Internal abstract val tmpDirectory: DirectoryProperty
 

@@ -1,4 +1,4 @@
-/* Copyright 2023 ENGEL Austria GmbH */
+/* Copyright 2023-2026 ENGEL Austria GmbH */
 package io.github.woolph.gradle.dependencycheck.suppression
 
 import io.github.woolph.gradle.util.children
@@ -24,7 +24,8 @@ data class SuppressionEntry(
   fun asXmlTag(desiredZoneId: ZoneId) = buildString {
     if (suppressUntil != null) {
       appendLine(
-          "    <suppress until=\"${DATE_FORMATTER_SUPPRESS_UNTIL.format(suppressUntil.withZoneSameInstant(desiredZoneId))}\">")
+          "    <suppress until=\"${DATE_FORMATTER_SUPPRESS_UNTIL.format(suppressUntil.withZoneSameInstant(desiredZoneId))}\">"
+      )
     } else {
       appendLine("    <suppress>")
     }
@@ -81,7 +82,8 @@ fun Sequence<SuppressionEntry>.writeTo(file: File, desiredZoneId: ZoneId) {
       buildString {
         appendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
         appendLine(
-            "<suppressions xmlns=\"https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd\">")
+            "<suppressions xmlns=\"https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd\">"
+        )
         this@writeTo.sortedBy { it.suppressUntil }
             .forEach {
               append(it.asXmlTag(desiredZoneId))

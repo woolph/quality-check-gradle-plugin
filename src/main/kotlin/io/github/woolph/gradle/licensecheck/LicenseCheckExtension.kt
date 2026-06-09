@@ -1,8 +1,9 @@
-/* Copyright 2023 ENGEL Austria GmbH */
+/* Copyright 2023-2026 ENGEL Austria GmbH */
 package io.github.woolph.gradle.licensecheck
 
 import com.github.jk1.license.filter.DependencyFilter
 import com.github.jk1.license.render.JsonReportRenderer
+import com.github.jk1.license.render.ReportRenderer
 import com.github.jk1.license.render.SimpleHtmlReportRenderer
 import com.github.jk1.license.task.CheckLicenseTask
 import io.github.woolph.gradle.Skipable
@@ -143,16 +144,18 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
         plugins.apply("com.github.jk1.dependency-license-report")
 
         tasks.named<com.github.jk1.license.task.CheckLicensePreparationTask>(
-            "checkLicensePreparation") {
-              group = "verification/license-check"
-              onlyIf { false } // skip this task cause it only adds a renderer
-            }
+            "checkLicensePreparation"
+        ) {
+          group = "verification/license-check"
+          onlyIf { false } // skip this task cause it only adds a renderer
+        }
 
         val createLicenseBundleNormalizerConfig =
             tasks.register<CreateLicenseBundleNormalizerConfigTask>(
-                "createLicenseBundleNormalizerConfig") {
-                  this.additionalLicenseNormalizerBundle.set(additonalLicenseNormalizerBundle)
-                }
+                "createLicenseBundleNormalizerConfig"
+            ) {
+              this.additionalLicenseNormalizerBundle.set(additonalLicenseNormalizerBundle)
+            }
 
         val generateLicenseReport =
             tasks.named<com.github.jk1.license.task.ReportTask>("generateLicenseReport") {
@@ -166,7 +169,8 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
                   .file(
                       createLicenseBundleNormalizerConfig.flatMap {
                         it.additionalLicenseNormalizerBundle
-                      })
+                      }
+                  )
                   .withPathSensitivity(PathSensitivity.RELATIVE)
                   .withPropertyName("additionalLicenseNormalizerBundle")
             }
@@ -181,7 +185,9 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
               licenseCheckReport.set(thisExtension.licenseCheckReport)
               projectDependenciesData.set(
                   thisExtension.reportsDirectory.file(
-                      CheckLicenseTaskJunitReport.PROJECT_JSON_FOR_LICENSE_CHECKING_FILE))
+                      CheckLicenseTaskJunitReport.PROJECT_JSON_FOR_LICENSE_CHECKING_FILE
+                  )
+              )
               this.tmpDirectory.set(tmpDirectory)
 
               onlyIf { thisExtension.aggregatedSkip.map { !it }.get() }
@@ -223,10 +229,12 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
               .getByName<com.github.jk1.license.LicenseReportExtension>("licenseReport")
               .apply {
                 renderers =
-                    arrayOf(
+                    arrayOf<ReportRenderer>(
                         SimpleHtmlReportRenderer(),
                         JsonReportRenderer(
-                            CheckLicenseTask.getPROJECT_JSON_FOR_LICENSE_CHECKING_FILE(), false),
+                            CheckLicenseTask.getPROJECT_JSON_FOR_LICENSE_CHECKING_FILE(),
+                            false,
+                        ),
                     )
                 outputDir = thisExtension.reportsDirectory.get().asFile.toString()
                 excludeBoms = true
@@ -282,7 +290,8 @@ abstract class LicenseCheckExtension @Inject constructor(project: Project) : Ski
               }
         }
       } catch (e: Exception) {
-        logger.error("licenseCheck will not be applied due to exception", e)
+        //        logger.error("licenseCheck will not be applied due to exception", e)
+        throw e
       }
     }
 

@@ -1,4 +1,4 @@
-/* Copyright 2023 ENGEL Austria GmbH */
+/* Copyright 2023-2026 ENGEL Austria GmbH */
 package io.github.woolph.gradle.dependencycheck.suppression
 
 import java.time.Duration
@@ -54,7 +54,9 @@ abstract class CheckSuppressionFileTask : DefaultTask() {
 
     suppressionFileCheckResult.convention(
         project.layout.buildDirectory.file(
-            "reports/dependency-check/suppression-file-check-result.txt"))
+            "reports/dependency-check/suppression-file-check-result.txt"
+        )
+    )
 
     falsePositivePattern.convention(Regex("false[\\s-_]positive", RegexOption.IGNORE_CASE))
 
@@ -74,8 +76,8 @@ abstract class CheckSuppressionFileTask : DefaultTask() {
               .filter {
                 it.notes?.contains(falsePositivePattern) != true &&
                     it.suppressUntil?.isBefore(
-                        today.get().atStartOfDay(ZoneId.systemDefault()).plus(maxSuppressUntil)) !=
-                        true
+                        today.get().atStartOfDay(ZoneId.systemDefault()).plus(maxSuppressUntil)
+                    ) != true
               }
               .toList()
 
@@ -84,10 +86,12 @@ abstract class CheckSuppressionFileTask : DefaultTask() {
       if (inappropriateEntries.isNotEmpty()) {
         inappropriateEntries.forEach {
           logger.error(
-              "the suppression file entry for ${it.packageUrl} (${it.vulnerabilities.joinToString { it.name }}) does neither contain FALSE POSITIVE note nor an appropriate expiration date")
+              "the suppression file entry for ${it.packageUrl} (${it.vulnerabilities.joinToString { it.name }}) does neither contain FALSE POSITIVE note nor an appropriate expiration date"
+          )
         }
         throw GradleException(
-            "Some entries in the DC suppression file ${originalSuppressionFile.get()} do neither have a FALSE POSITIVE note nor an appropriate expiration date set (at max the suppression expiration should be one year)")
+            "Some entries in the DC suppression file ${originalSuppressionFile.get()} do neither have a FALSE POSITIVE note nor an appropriate expiration date set (at max the suppression expiration should be one year)"
+        )
       }
     }
   }

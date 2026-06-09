@@ -1,4 +1,4 @@
-/* Copyright 2023 ENGEL Austria GmbH */
+/* Copyright 2023-2026 ENGEL Austria GmbH */
 package io.github.woolph.gradle
 
 import java.io.File
@@ -20,48 +20,55 @@ class QualityCheckPluginTests {
     @JvmStatic
     val SUPPORTED_GRADLE_VERSIONS =
         listOf(
-            "9.0.0",
-            "8.14.3",
-            "7.6.6",
+            "9.5.1",
+            "8.14.5",
         )
   }
 
   @TempDir lateinit var testProjectDir: File
   lateinit var settingsFile: File
   lateinit var buildFile: File
+  lateinit var gradleProperties: File
 
   @BeforeEach
   fun setup() {
     settingsFile = File(testProjectDir, "settings.gradle")
     buildFile = File(testProjectDir, "build.gradle")
+    gradleProperties = File(testProjectDir, "gradle.properties")
   }
 
   @ParameterizedTest
   @MethodSource("supportedGradleVersions")
   fun `project without check or test task`(gradleVersion: String) {
+    gradleProperties.writeText(
+        """
+        org.gradle.configuration-cache=true
+        """
+            .trimIndent(),
+    )
     settingsFile.writeText(
         """
-            rootProject.name = 'dependency-check-skip'
-            """
+        rootProject.name = 'dependency-check-skip'
+        """
             .trimIndent(),
     )
     buildFile.writeText(
         """
-            plugins {
-                id 'io.github.woolph.quality-check'
+        plugins {
+            id 'io.github.woolph.quality-check'
+        }
+
+        group = 'io.github.woolph.test'
+
+        qualityCheck {
+            dependencyCheck {
+                skip = true
             }
-            
-            group = 'io.github.woolph.test'
-            
-            qualityCheck {
-                dependencyCheck {
-                    skip = true
-                }
-                licenseCheck {
-                    skip = true
-                }
+            licenseCheck {
+                skip = true
             }
-            """
+        }
+        """
             .trimIndent(),
     )
 
@@ -74,7 +81,11 @@ class QualityCheckPluginTests {
             .buildAndFail()
 
     println(result.output)
-    assertTrue(result.output.contains("FAILURE: Build failed with an exception."))
+    assertTrue(
+        result.output.contains(
+            "Task with name 'check' not found in root project 'dependency-check-skip'."
+        )
+    )
   }
 
   @ParameterizedTest
@@ -82,28 +93,28 @@ class QualityCheckPluginTests {
   fun `set dependency check to skip`(gradleVersion: String) {
     settingsFile.writeText(
         """
-            rootProject.name = 'dependency-check-skip'
-            """
+        rootProject.name = 'dependency-check-skip'
+        """
             .trimIndent(),
     )
     buildFile.writeText(
         """
-            plugins {
-                id 'java'
-                id 'io.github.woolph.quality-check'
+        plugins {
+            id 'java'
+            id 'io.github.woolph.quality-check'
+        }
+
+        group = 'io.github.woolph.test'
+
+        qualityCheck {
+            dependencyCheck {
+                skip = true
             }
-            
-            group = 'io.github.woolph.test'
-            
-            qualityCheck {
-                dependencyCheck {
-                    skip = true
-                }
-                licenseCheck {
-                    skip = true
-                }
+            licenseCheck {
+                skip = true
             }
-            """
+        }
+        """
             .trimIndent(),
     )
 
@@ -130,33 +141,33 @@ class QualityCheckPluginTests {
   fun `licenseCheck succeeds for allowed license`(gradleVersion: String) {
     settingsFile.writeText(
         """
-            rootProject.name = 'licenseCheckOnly'
-            """
+        rootProject.name = 'licenseCheckOnly'
+        """
             .trimIndent(),
     )
     buildFile.writeText(
         """
-            plugins {
-                id 'java'
-                id 'io.github.woolph.quality-check'
+        plugins {
+            id 'java'
+            id 'io.github.woolph.quality-check'
+        }
+
+        group = 'io.github.woolph.test'
+
+        repositories {
+            mavenCentral()
+        }
+
+        dependencies {
+            implementation("javax.annotation:javax.annotation-api:1.3.2")
+        }
+
+        qualityCheck {
+            dependencyCheck {
+                skip = true
             }
-            
-            group = 'io.github.woolph.test'
-            
-            repositories {
-                mavenCentral()
-            }
-            
-            dependencies {
-                implementation("javax.annotation:javax.annotation-api:1.3.2")
-            }
-            
-            qualityCheck {
-                dependencyCheck {
-                    skip = true
-                }
-            }
-            """
+        }
+        """
             .trimIndent(),
     )
 
@@ -180,36 +191,36 @@ class QualityCheckPluginTests {
   fun `licenseCheck fails for not allowed license`(gradleVersion: String) {
     settingsFile.writeText(
         """
-            rootProject.name = 'licenseCheckOnly'
-            """
+        rootProject.name = 'licenseCheckOnly'
+        """
             .trimIndent(),
     )
     buildFile.writeText(
         """
-            plugins {
-                id 'java'
-                id 'io.github.woolph.quality-check'
+        plugins {
+            id 'java'
+            id 'io.github.woolph.quality-check'
+        }
+
+        group = 'io.github.woolph.test'
+
+        repositories {
+            mavenCentral()
+        }
+
+        dependencies {
+            implementation("javax.annotation:javax.annotation-api:1.3.2")
+        }
+
+        qualityCheck {
+            dependencyCheck {
+                skip = true
             }
-            
-            group = 'io.github.woolph.test'
-            
-            repositories {
-                mavenCentral()
+            licenseCheck {
+                allowedLicenses = ["MIT-0"]
             }
-            
-            dependencies {
-                implementation("javax.annotation:javax.annotation-api:1.3.2")
-            }
-            
-            qualityCheck {
-                dependencyCheck {
-                    skip = true
-                }
-                licenseCheck {
-                    allowedLicenses = ["MIT-0"]
-                }
-            }
-            """
+        }
+        """
             .trimIndent(),
     )
 

@@ -1,4 +1,4 @@
-/* Copyright 2025 ENGEL Austria GmbH */
+/* Copyright 2025-2026 ENGEL Austria GmbH */
 package io.github.woolph.gradle.dependencycheck
 
 import io.github.woolph.gradle.dependencycheck.suppression.Vulnerability
@@ -72,9 +72,8 @@ abstract class CheckVulnerabilities : DefaultTask() {
                       VulnerabilityCause(
                           testcase.attributes["name"]?.value?.toModuleString() ?: "unknown",
                           listOf(
-                              Vulnerability(
-                                  VulnerabilityType.VulnerabilityName,
-                                  vulnerability)), // TODO determine correct
+                              Vulnerability(VulnerabilityType.VulnerabilityName, vulnerability)
+                          ), // TODO determine correct
                           // VulnerabilityType
                       )
                     }
@@ -87,7 +86,8 @@ abstract class CheckVulnerabilities : DefaultTask() {
       vulnerabilities?.forEach {
         val causes = resolutionResult.getRequestedParentDependencies(it.moduleString)
         logger.warn(
-            "$causes introduced ${it.moduleString} with the ${it.vulnerabilities.map { it.name }}")
+            "$causes introduced ${it.moduleString} with the ${it.vulnerabilities.map { it.name }}"
+        )
       }
     }
   }
@@ -108,12 +108,12 @@ abstract class CheckVulnerabilities : DefaultTask() {
             description.cause == ComponentSelectionCause.REQUESTED
           }
 
-      if (isRootComponents) {
-        return emptyList()
+      return if (isRootComponents) {
+        emptyList()
       } else if (isFirstLevelComponent) {
-        return listOf(this)
+        listOf(this)
       } else {
-        return dependents
+        dependents
             .filter { it.resolvedVariant.attributes.getAttribute(ATTRIBUTE_CATEGORY) != "platform" }
             .flatMap { it.from.findFirstLevelParents() }
       }

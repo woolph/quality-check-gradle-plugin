@@ -1,8 +1,10 @@
-/* Copyright 2023 ENGEL Austria GmbH */
+/* Copyright 2023-2026 ENGEL Austria GmbH */
 package io.github.woolph.gradle
 
 import java.io.File
 import java.util.stream.Stream
+import kotlin.io.path.Path
+import kotlin.io.path.readText
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -47,25 +49,27 @@ class DependencyCheckTests {
         """
             rootProject.name = 'dependency-check-skip'
             """
+            .trim()
 
     buildFile hasContent
         """
-            plugins {
-                id 'java'
-                id 'io.github.woolph.quality-check'
+        plugins {
+            id 'java'
+            id 'io.github.woolph.quality-check'
+        }
+
+        group = 'io.github.woolph.test'
+
+        qualityCheck {
+            dependencyCheck {
+                skip = true
             }
-            
-            group = 'io.github.woolph.test'
-            
-            qualityCheck {
-                dependencyCheck {
-                    skip = true
-                }
-                licenseCheck {
-                    skip = true
-                }
+            licenseCheck {
+                skip = true
             }
-            """
+        }
+        """
+            .trimIndent()
 
     dependencyCheckSuppression.doesNotExist()
 
@@ -91,24 +95,26 @@ class DependencyCheckTests {
   fun `skip dependency check via cli`(gradleVersion: String) {
     settingsFile hasContent
         """
-            rootProject.name = 'dependency-check-skip'
-            """
+        rootProject.name = 'dependency-check-skip'
+        """
+            .trimIndent()
 
     buildFile hasContent
         """
-            plugins {
-                id 'java'
-                id 'io.github.woolph.quality-check'
+        plugins {
+            id 'java'
+            id 'io.github.woolph.quality-check'
+        }
+
+        group = 'io.github.woolph.test'
+
+        qualityCheck {
+            licenseCheck {
+                skip = true
             }
-            
-            group = 'io.github.woolph.test'
-            
-            qualityCheck {
-                licenseCheck {
-                    skip = true
-                }
-            }
-            """
+        }
+        """
+            .trimIndent()
 
     dependencyCheckSuppression.doesNotExist()
 
@@ -203,6 +209,12 @@ class DependencyCheckTests {
             }
             """
 
+    gradleProperties hasContent
+        """
+      DEPENDENCY_CHECK_DB_NVD_API_KEY=${Path("secrets/NVD_API_KEY").readText().trim()}  
+      """
+            .trimIndent()
+
     dependencyCheckSuppression.doesNotExist()
 
     val result: BuildResult =
@@ -253,20 +265,18 @@ class DependencyCheckTests {
             </suppressions>
         """
 
+    gradleProperties hasContent
+        """
+      DEPENDENCY_CHECK_DB_NVD_API_KEY=${Path("secrets/NVD_API_KEY").readText().trim()}  
+      """
+            .trimIndent()
+
     val result: BuildResult =
         GradleRunner.create()
             .withGradleVersion(gradleVersion)
             .withProjectDir(testProjectDir)
             .withArguments("check")
             .withPluginClasspath()
-            //            .withEnvironment(
-            //                listOf(
-            //                    "ORG_GRADLE_PROJECT_DEPENDENCY_CHECK_DB_DRIVER",
-            //                    "ORG_GRADLE_PROJECT_DEPENDENCY_CHECK_DB_CONNECTION",
-            //                    "ORG_GRADLE_PROJECT_DEPENDENCY_CHECK_DB_USER",
-            //                    "ORG_GRADLE_PROJECT_DEPENDENCY_CHECK_DB_PASSWORD",
-            //                ).associateWith { System.getenv(it) },
-            //            )
             .build()
 
     assertEquals(TaskOutcome.SUCCESS, result.task(":check")?.outcome)
@@ -315,6 +325,8 @@ class DependencyCheckTests {
                     "ORG_GRADLE_PROJECT_DEPENDENCY_CHECK_DB_DRIVER" to "h2",
                     "ORG_GRADLE_PROJECT_DEPENDENCY_CHECK_DB_CONNECTION" to "blabla",
                     "ORG_GRADLE_PROJECT_DEPENDENCY_CHECK_DB_USER" to "user",
+                    "ORG_GRADLE_PROJECT_DEPENDENCY_CHECK_DB_NVD_API_KEY" to
+                        Path("./secrets/NVD_API_KEY").readText().trim(),
                 ),
             )
             .build()

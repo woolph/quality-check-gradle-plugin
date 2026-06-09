@@ -7,129 +7,206 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased/Upcoming
 
-## [3.0.2]
+## [3.1.0]
+
+### Added
+
+- feature compatibility metainfo for configuration cache
+- added support for NVD API key (by providing a gradle property name `DEPENDENCY_CHECK_DB_NVD_API_KEY` with a valid NVD
+  API key)
+
 ### Changed
+
+- updated plugin-publish to 2.x
+- updated org.owasp.dependencycheck to 12.2.2
+- dependencyCheck.cvssThreshold defaults to 11.0f (instead of 0.0f) unless there's a environment variable named
+  "BUILD_REASON" containing the value "PullRequest" in which case it defaults to 0.0f (so builds will only fail due to
+  unsuppressed vulnerabilities of any severity, if it is a test build for a Pull Request; otherwise it will not fail
+  and just report detected vulnerabilities). This was changed so we regain reproducible builds (without the need to
+  accommodate for newly discovered vulnerabilities)
+
+## [3.0.2]
+
+### Changed
+
 - updated org.owasp.dependencycheck to 12.1.3
 
 ## [3.0.1]
+
 ### Fixed
-- fixed warning "[Calling Task.getProject() from a task action](https://docs.gradle.org/8.12.1/userguide/upgrading_version_7.html#task_project)"
-- 
+
+- fixed
+  warning "[Calling Task.getProject() from a task action](https://docs.gradle.org/8.12.1/userguide/upgrading_version_7.html#task_project)"
+-
 - using `tasks.register` in favor of `tasks.create` to better support lazy configuration
 - fixed issue that suppression file was not set properly for `checkVulnerabilities` task
 
 ## [3.0.0]
+
 ### Fixed
-- fixed wrong classpath fingerprint/cache key calculation for subprojects by introducing a new task named `checkVulnerability` encapsulating the `dependencyCheckAnalyze` task (it also integrates the `printVulnerabilityCause` task, which is therefore obsolete)
+
+- fixed wrong classpath fingerprint/cache key calculation for subprojects by introducing a new task named
+  `checkVulnerability` encapsulating the `dependencyCheckAnalyze` task (it also integrates the `printVulnerabilityCause`
+  task, which is therefore obsolete)
 
 ## [2.2.2]
+
 ### Changed
+
 - improved build cache behavior for dependency check and license check tasks
-  - dependency check is now considered up-to-date if the it was run already on the the same day (dependency check relies on external data (NVD database), but the mirror database used by the CI pipeline is only updated once a day, therefore multiple checks per day are not necessary)
+  - dependency check is now considered up-to-date if the it was run already on the the same day (dependency check relies
+    on external data (NVD database), but the mirror database used by the CI pipeline is only updated once a day,
+    therefore multiple checks per day are not necessary)
 
 ## [2.2.1]
+
 ### Fixed
+
 - fixed usage of deprecated method in the dependency check plugin
 - reduce logging at warn level
 
 ## [2.2.0]
+
 ### Added
-- added the possibility to skip checks by setting gradle properties in the gradle.properties file or passing them via cli arguments
+
+- added the possibility to skip checks by setting gradle properties in the gradle.properties file or passing them via
+  cli arguments
   - skipping the dependency check task by setting `skipDependencyCheck=true`
   - skipping the license check task by setting `skipLicenseCheck=true`
 
 ## [2.1.0]
+
 ### Added
+
 - added jacoco plugin again
 
 ### Changed
+
 - updating dependency check plugin to 10.0.4
 
 ## [2.0.0]
+
 ### Changed
+
 - updating dependency check plugin to 9.1.0
 - removing sonar/sonarqube plugin
 
 ## [1.4.0]
+
 ### Removed
+
 - Removed sonarqube plugin
 
 ## [1.2.8] 2023-11-09
+
 ### Changed
+
 - added missing module data for org.jetbrains.kotlin:kotlin-stdlib-common:1.9.20
 
 ## [1.2.7] 2023-10-19
+
 ### Changed
-- make printVulnerabilityCauseTask skipable cause it runs into Java 
+
+- make printVulnerabilityCauseTask skipable cause it runs into Java
 
 ## [1.2.6] 2023-07-19
+
 ### Fixed
+
 - fixing issue trying to access the sonar task in sub-projects, while the sonar plugins only registers it
-for the root-project
+  for the root-project
 
 ## [1.2.5] 2023-06-15
+
 ### Changed
+
 - Added LGPL 3.0, "Go License" and "Indiana University Extreme! Lab Software License" to the license white list
 - Updated plugins
   - com.github.jk1.dependency-license-report to 2.4 (formerly 2.1)
   - org.sonarqube to 4.2.1.3168 (formerly 4.0.0.2929)
+
 ### Fixed
+
 - adding normalization for EPL v1.0 and MPL 2.0 (h2 libs use unrecognized shortnames for these licenses)
 
 ## [1.2.4] 2023-06-13
+
 ### Changed
-- Added EPLv2 & LGPL 2.1 to the license white list 
+
+- Added EPLv2 & LGPL 2.1 to the license white list
 - Removing version check for kotlinx-coroutines-core license fixer (somehow kotlinx-coroutines-core is missing the
-license information, so the quality check plugin provides it) 
+  license information, so the quality check plugin provides it)
 
 ### Fixed
+
 - InputFile issue with PrintVulnerabilityCauseTask
 
 ## [1.2.3] - 2023-05-22
+
 ### Added
+
 - Printing the causing 1st level dependencies for vulnerabilities in transient dependencies
 
 ### Fixed
+
 - Fixed log messages with checkLicenses
 - Fixing note indentation on generatedSuppressionFile
 
 ## [1.2.2] - 2023-03-01
+
 ### Fixed
+
 - Fixing issue with generateSuppressionFile detecting whether an original suppression file exists
 
 ## [1.2.1] - 2023-02-28
+
 ### Changed
+
 - Adding a link to the notes of new vulnerabilities in the result of the `generateSuppressionFile` task
 
 ## [1.2.0] - 2023-02-28
+
 ### Added
+
 - Adding tasks for checking, generating, & updating the suppression file for dependency check
 
 ## [1.1.1] - 2023-02-15
+
 ### Changed
+
 - Updated Sonar Plugin from 3.5.0 to 4.0.0.2929 to support gradle 8.0
-- LicenseCheck now also ignores `org.springframework.cloud:spring-cloud-dependencies` & 
-`org.springframework.cloud:spring-cloud-sleuth-otel-dependencies` (besides 
-`org.springframework.boot:spring-boot-dependencies`) because they are otherwise not detected as BOM artifacts which we
-want to exclude from license checking
+- LicenseCheck now also ignores `org.springframework.cloud:spring-cloud-dependencies` &
+  `org.springframework.cloud:spring-cloud-sleuth-otel-dependencies` (besides
+  `org.springframework.boot:spring-boot-dependencies`) because they are otherwise not detected as BOM artifacts which we
+  want to exclude from license checking
 
 ## [1.1.0] - 2023-02-15
+
 ### Added
+
 - Added a plugin to check for licenses of 3rd party dependencies
 
 ## [1.0.0] - 2023-01-09
+
 ### Changed
+
 - Updated Dependency Check plugin to 7.4.4 (formerly 7.1.1) to fix issues with updating the local NVD cache
 - Updated Sonar Plugin from 3.4.0 to 3.5.0
 
 ## [0.1.2] - 2022-07-29
+
 ### Changed
+
 - Made database credentials optional (in case we can use SSO with AD account)
 
 ## [0.1.1] - 2022-07-25
+
 ### Added
-- JDBC-Driver for MSSQL to support 
+
+- JDBC-Driver for MSSQL to support
 
 ## [0.1.0] - 2022-06-21
+
 ### Added
+
 - Initial version

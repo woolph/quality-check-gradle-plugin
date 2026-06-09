@@ -1,4 +1,4 @@
-/* Copyright 2023 ENGEL Austria GmbH */
+/* Copyright 2023-2026 ENGEL Austria GmbH */
 package io.github.woolph.gradle.licensecheck
 
 import com.github.jk1.license.ConfigurationData
@@ -13,7 +13,7 @@ import org.gradle.api.provider.Provider
  */
 internal class WhiteListedDependencyFilter(
     val logger: Logger,
-    val regexProvider: Provider<Set<Regex>>
+    val regexProvider: Provider<Set<Regex>>,
 ) : DependencyFilter {
   override fun filter(source: ProjectData) =
       regexProvider.orNull?.let { regexs ->

@@ -1,5 +1,6 @@
 /.gradle/
-/build/
+build/
+secrets/
 
 ### STS ###
 .apt_generated

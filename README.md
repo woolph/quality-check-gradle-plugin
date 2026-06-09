@@ -2,98 +2,176 @@
 
 
 [![Gradle plugin](https://img.shields.io/badge/plugins.gradle.org-io.github.woolph.quality--check-blue.svg)](https://plugins.gradle.org/plugin/io.github.woolph.quality-check)
-[![Changelog](https://img.shields.io/badge/changelog-3.0.1-blue.svg)](CHANGELOG.md)
+[![Changelog](https://img.shields.io/badge/changelog-3.1.0-blue.svg)](CHANGELOG.md)
 
-`quality-check` is a gradle plugin which adds and preconfigures other plugins which are essential to ensure code quality
-and security.
+`quality-check` is a Gradle plugin that wraps and pre-configures two third-party plugins to enforce dependency security
+and license compliance:
+
+* **[OWASP Dependency Check](https://jeremylong.github.io/DependencyCheck/)** — scans runtime dependencies for known CVEs (Common Vulnerabilities and Exposures)
+* **[Gradle License Report](https://github.com/jk1/Gradle-License-Report)** — verifies that all dependency licenses are on an allowlist
+
+Applying the plugin wires both checks into the standard `check` task automatically, so running `./gradlew build` is all
+that is required.
 
 ## Quick setup
-Add the plugin with the id `io.github.woolph.quality-check` to your gradle build:
 
-```kotlin
-plugins {
-    id("io.github.woolph.quality-check") version "3.0.2"
-}
-```
-
-
-## What does it do?
-The quality check adds several other plugins to your gradle build with the intent to ensure code quality and code 
-security. More precisely, it adds the following plugins:
-* `org.owasp:dependency-check-gradle:12.1.3` which checks your 3rd party dependencies for known vulnerabilities
-* `com.github.jk1:gradle-license-report:2.9` which checks the licenses of your 3rd party dependencies
-
-Your gradle build is automatically configured in a way that the `check` of your build depends upon 
-all the relevant tasks introduced by these plugins. Here is what it would look like, if you'd have to do this
-explicitly (but you DON'T have to do that, 'cause it is already setup this way!):
+Add the plugin to your Gradle build:
 
 ````kotlin
-tasks.check {
-    dependsOn(
-        tasks.dependencyCheckAnalyze,
-        tasks.checkLicense,
-    )
+plugins {
+    id("io.github.woolph.quality-check") version "3.1.0"
 }
 ````
 
-The `check` task (which also depends on the `test` task executing the unit tests of your project) will be executed 
-with every execution of the `build` task, so you do not have to do anything except for adding the plugin to your build.
+That is all. Both checks run as part of `./gradlew check` (and therefore `./gradlew build`) without any further
+configuration.
 
-In some cases, some tweaking of the checks performed may be necessary to better fit your projects purpose.
+## Task wiring
 
-### Dependency Check
-#### Suppression file
-With the help of the suppression file (usually located here `{projectDir}\dependency-check-suppression.xml`) you can 
-suppress either false positives or vulnerabilities you want to ignore for now.
+The plugin registers the following task chain:
 
-Please make sure to either mark these suppression entries with a FALSE-POSITIVE "tag" or with an expiration date because 
-there's a task `checkSuppressionFile` which is performed before `dependencyCheckAnalyze` and checks the suppression file 
-provided for "inappropriate" suppression entries. An entry is considered appropriate it 
-* it contains a FALSE POSITIVE "tag" in the notes, which indicates that the suppressed vulnerability is not affecting the 
-application,
-* or it has an expiration date which is not further way than the maxSuppressionUntil (usually a year from now). Passing 
-the expiration date disables the suppression entry, forcing you to reevaluate the vulnerability. Therefore, this expiring 
-suppression may be useful for vulnerabilities that, for some reason, cannot be fixed right away.
+```
+check
+├── checkVulnerabilities         (parses the OWASP report and logs which direct dependency pulled in each CVE)
+│   └── checkSuppressionFile     (validates the suppression XML before the scan runs)
+│       └── dependencyCheckAnalyze
+└── checkLicenses                (fails the build if any dependency license is not on the allowlist)
+    └── generateLicenseReport
+```
 
-##### Generate a suppression file
-There is also a task which allows you to generate a new suppression file containing all the suppression entries of the 
-original file which are still necessary (suppression entries which aren't needed anymore are removed) adding new 
-suppression entries for each vulnerability found in the dependencyCheck report (so, please make sure to perform the 
-`dependencyCheckAnalyze` task beforehand).
+## Configuration
 
-````shell
-gradlew generateSuppressionFile -PsuppressUntil=2023-04-01
+All options live inside a `qualityCheck {}` block:
+
+````kotlin
+qualityCheck {
+    dependencyCheck {
+        skip = true                          // disable the vulnerability check entirely
+        cvssThreshold = 7.0f                 // fail only on CVSS score ≥ 7.0 (default: 0.0 on PRs, 11.0 otherwise)
+        suppressionFile = file("dependency-check-suppression.xml")  // default location
+    }
+    licenseCheck {
+        skip = true                          // disable the license check entirely
+        allowedLicenses.add("MIT License")   // add a license to the allowlist
+        allowedLicenses.set(setOf("Apache License, Version 2.0", "MIT License"))  // replace the whole allowlist
+
+        whiteListedDependencies {
+            add("com.example:some-dep")                            // skip license check for this dependency forever
+            add(Regex("^com\\.example\\..*")) until "2026-12-31"  // skip until the given date, then re-evaluate
+        }
+    }
+}
 ````
 
-##### Show vulnerabilities in dependency tree
-The following command can be used to highlight all dependencies in the dependency tree for which there is 
-currently an entry in the suppression file:
+### Default allowed licenses
+
+The following licenses are allowed by default:
+
+* MIT License, MIT-0
+* Apache License, Version 2.0
+* BSD Zero Clause License, The 2-Clause BSD License, The 3-Clause BSD License
+* GNU GENERAL PUBLIC LICENSE, Version 2 + Classpath Exception
+* GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1 / v3.0
+* Go License
+* Indiana University Extreme! Lab Software License
+* COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0
+* Eclipse Public License - v 1.0 / v 2.0
+* PUBLIC DOMAIN
+* Bouncy Castle Licence
+
+### Skipping checks from the command line
+
+Both checks can be skipped without touching the build file:
+
 ````shell
-gradlew dependencies --configuration runtimeClasspath | grep --color=auto -E "$(cat dependency-check-suppression.xml | grep '<packageUrl>' | sed 's_.*pkg:maven/\(.*\)/\(.*\)@.*_\1:\2_' | sort -u | tr '\n' '|')\$"
+./gradlew build -PskipDependencyCheck=true
+./gradlew build -PskipLicenseCheck=true
 ````
 
-#### Using a mirror database
-The `dependencyCheckAnalyze` task relies on a database containing information about vulnerabilities in 3rd party 
-libraries and build artifacts. This information comes e.g. from the Nist NVD. By default, the plugin downloads
-the data and stores it in a local database in your local gradle cache. Once a database exists, the task checks if it
-needs to be updated.
+### CVSS threshold and PR builds
 
-Under certain circumstances it might be beneficially to avoid this default mechanism (for example on build agents
-you might lose the gradle cache, which causes the dependencyCheckUpdate task to download the NVD data for every build 
-anew), by providing a database for the plugin to be used. You can do so by setting special gradle properties:
+The `cvssThreshold` controls at which CVSS score the build fails:
 
-* `DEPENDENCY_CHECK_DB_DRIVER` is the full-qualified name of the jdbc driver (the following drivers are readily 
-available in the classpath of this gradle plugin:)
-  * `org.postgresql.Driver` (from `org.postgresql:postgresql:42.7.7`)
-  * `com.microsoft.sqlserver.jdbc.SQLServerDriver` (from `com.microsoft.sqlserver:mssql-jdbc:12.2.0.jre11`)
-* `DEPENDENCY_CHECK_DB_CONNECTION` is a jdbc string for accessing the database
-* `DEPENDENCY_CHECK_DB_USER`
-* `DEPENDENCY_CHECK_DB_PASSWORD`
+| Scenario | Default threshold | Effect |
+|---|---|---|
+| `BUILD_REASON=PullRequest` (CI) | `0.0` | Any CVE fails the build |
+| All other builds | `11.0` | Build never fails (CVEs are reported only) |
 
+Override by setting `cvssThreshold` explicitly in the `dependencyCheck {}` block.
 
-### License Report
-In software projects, you may want to take a close look on the licenses of your 3rd party dependencies, because some of 
-the commonly used licenses could force you to disclose your source code, which may be detrimental especially for closed 
-source projects. The license report plugin allows you to define a set of licenses which you consider "safe" and the 
-`checkLicense` (which the `check` task will depend upon) checks whether the licenses of your 3rd party dependencies are
-within this set. If not, the build fails.
+## Dependency Check
+
+### Suppression file
+
+Vulnerabilities that are false positives or cannot be fixed immediately can be suppressed via
+`dependency-check-suppression.xml` (default location: `{projectDir}/dependency-check-suppression.xml`).
+
+The `checkSuppressionFile` task validates the suppression file before each scan. An entry is considered valid if it
+meets **one** of these conditions:
+
+* It has a note containing the text `FALSE POSITIVE`, indicating the vulnerability does not affect the application.
+* It has an expiration date no more than one year in the future. Once the date passes, the entry is ignored, forcing
+  you to re-evaluate the vulnerability.
+
+#### Generating or updating the suppression file
+
+After running `dependencyCheckAnalyze`, you can generate a new suppression file that removes obsolete entries and adds
+entries for all newly found vulnerabilities:
+
+````shell
+./gradlew generateSuppressionFile -PsuppressUntil=2027-01-01
+````
+
+The result is written to `dependency-check-suppression.new.xml`. Review it, then replace the original file.
+
+To update the existing file in place instead, use `updateSuppressionFile`.
+
+#### Highlighting suppressed dependencies in the dependency tree
+
+The following command prints the full dependency tree and highlights every dependency that currently has a suppression
+entry. It works by extracting the `pkg:maven` coordinates from the suppression file and using them as a `grep` pattern:
+
+````shell
+./gradlew dependencies --configuration runtimeClasspath \
+  | grep --color=auto -E "$(grep '<packageUrl>' dependency-check-suppression.xml \
+      | sed 's_.*pkg:maven/\(.*\)/\(.*\)@.*_\1:\2_' \
+      | sort -u | tr '\n' '|')\$"
+````
+
+### Using a mirror database
+
+By default, `dependencyCheckAnalyze` downloads the NVD vulnerability data into the local Gradle cache and refreshes it
+on each run. On ephemeral build agents the cache is lost between builds, causing a full NVD download every time.
+
+To point the plugin at a shared JDBC database instead, set these Gradle properties (e.g. in `gradle.properties` or as
+environment variables passed to the build):
+
+| Property | Description |
+|---|---|
+| `DEPENDENCY_CHECK_DB_CONNECTION` | JDBC connection string — setting this activates mirror mode and disables `autoUpdate` |
+| `DEPENDENCY_CHECK_DB_DRIVER` | Fully-qualified JDBC driver class name |
+| `DEPENDENCY_CHECK_DB_USER` | Database username |
+| `DEPENDENCY_CHECK_DB_PASSWORD` | Database password |
+
+The following JDBC drivers are bundled with the plugin:
+
+* `org.postgresql.Driver` (from `org.postgresql:postgresql:42.7.7`)
+* `com.microsoft.sqlserver.jdbc.SQLServerDriver` (from `com.microsoft.sqlserver:mssql-jdbc:12.2.0.jre11`)
+
+## License Check
+
+Some open-source licenses (e.g. AGPL, GPL without Classpath Exception) require you to publish your own source code when
+distributing software that links against them. The license check prevents unlicensed dependencies from silently entering
+a closed-source project.
+
+The `checkLicenses` task fails the build if any dependency's license is not in the `allowedLicenses` set. See the
+[Configuration](#configuration) section above for how to extend the allowlist or whitelist individual dependencies.
+
+Dependencies matching the project's own group prefix (derived from the first two segments of `project.group`) are
+excluded automatically, so your own multi-module artifacts are never flagged.
+
+## Gradle version support
+
+This plugin supports Gradle versions starting with Gradle 8.14.5.
+
+This plugin fully supports [Build Cache](https://docs.gradle.org/current/userguide/build_cache.html) and [Configuration Cache](https://docs.gradle.org/current/userguide/configuration_cache.html).

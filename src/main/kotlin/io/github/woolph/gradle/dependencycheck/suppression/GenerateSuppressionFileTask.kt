@@ -1,4 +1,4 @@
-/* Copyright 2023 ENGEL Austria GmbH */
+/* Copyright 2023-2026 ENGEL Austria GmbH */
 package io.github.woolph.gradle.dependencycheck.suppression
 
 import io.github.woolph.gradle.util.children
@@ -9,16 +9,25 @@ import java.time.ZonedDateTime
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
+@CacheableTask
 abstract class GenerateSuppressionFileTask : DefaultTask() {
-  @get:InputFile abstract val dependencyCheckXmlReport: RegularFileProperty
+  @get:InputFile
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  abstract val dependencyCheckXmlReport: RegularFileProperty
 
-  @get:InputFile @get:Optional abstract val originalSuppressionFile: RegularFileProperty
+  @get:InputFile
+  @get:Optional
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  abstract val originalSuppressionFile: RegularFileProperty
 
   @get:OutputFile abstract val suppressionFile: RegularFileProperty
 
@@ -63,20 +72,19 @@ abstract class GenerateSuppressionFileTask : DefaultTask() {
                   testcase.attributes["classname"]?.value?.let { vulnerability ->
                     val packageUrl = testcase.attributes["name"]?.value ?: "unknown"
                     val suppressionNote =
-                        testcase
+                        (testcase
                             .children()
                             .filter { it.nodeName == "skipped" }
                             .firstOrNull()
-                            ?.let { it.attributes["message"]?.value }
+                            ?.let { it.attributes["message"]?.value })
                             ?: "TODO enter reason why this can be suppressed or otherwise fix it!\n" +
                                 "see details on http://web.nvd.nist.gov/view/vuln/detail?vulnId=$vulnerability"
 
                     SuppressionEntry(
                         packageUrl,
                         listOf(
-                            Vulnerability(
-                                VulnerabilityType.VulnerabilityName,
-                                vulnerability)), // TODO determine correct
+                            Vulnerability(VulnerabilityType.VulnerabilityName, vulnerability)
+                        ), // TODO determine correct
                         // VulnerabilityType
                         notes = suppressionNote,
                         suppressUntil = suppressUntil,
@@ -118,7 +126,8 @@ abstract class GenerateSuppressionFileTask : DefaultTask() {
                       vulnerabilities = suppressedVulnerabilities,
                       suppressUntil =
                           if (it.suppressUntil == null) null
-                          else (suppressUntil ?: it.suppressUntil))
+                          else (suppressUntil ?: it.suppressUntil),
+                  )
                 } else {
                   null
                 }
