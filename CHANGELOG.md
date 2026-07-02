@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased/Upcoming
 
+## [3.1.1]
+
+### Fixed
+- deprecation warning on the use of `Project.getProperties` regarding Gradle 10
+
 ## [3.1.0]
 
 ### Added

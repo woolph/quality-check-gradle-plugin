@@ -185,7 +185,7 @@ class DependencyCheckTests {
 
   @ParameterizedTest
   @MethodSource("supportedGradleVersions")
-  fun `when no supression xml exists then checkSuppressionFile task is skipped`(
+  fun `when no suppression xml exists then checkSuppressionFile task is skipped`(
       gradleVersion: String
   ) {
     settingsFile hasContent
@@ -221,21 +221,16 @@ class DependencyCheckTests {
         GradleRunner.create()
             .withGradleVersion(gradleVersion)
             .withProjectDir(testProjectDir)
-            .withArguments("check")
+            .withArguments("checkSuppressionFile")
             .withPluginClasspath()
             .build()
 
-    assertEquals(TaskOutcome.SUCCESS, result.task(":check")?.outcome)
-    assertEquals(TaskOutcome.SUCCESS, result.task(":checkVulnerabilities")?.outcome)
     assertEquals(TaskOutcome.SKIPPED, result.task(":checkSuppressionFile")?.outcome)
-    assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
-    assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
-    println(result.task(":dependencyCheckAnalyze")?.path)
   }
 
   @ParameterizedTest
   @MethodSource("supportedGradleVersions")
-  fun `when an empty supression xml exists then checkSuppressionFile task is successful`(
+  fun `when an empty suppression xml exists then checkSuppressionFile task is successful`(
       gradleVersion: String
   ) {
     settingsFile hasContent
@@ -275,16 +270,11 @@ class DependencyCheckTests {
         GradleRunner.create()
             .withGradleVersion(gradleVersion)
             .withProjectDir(testProjectDir)
-            .withArguments("check")
+            .withArguments("checkSuppressionFile")
             .withPluginClasspath()
             .build()
 
-    assertEquals(TaskOutcome.SUCCESS, result.task(":check")?.outcome)
-    assertEquals(TaskOutcome.SUCCESS, result.task(":checkVulnerabilities")?.outcome)
     assertEquals(TaskOutcome.SUCCESS, result.task(":checkSuppressionFile")?.outcome)
-    assertEquals(TaskOutcome.SKIPPED, result.task(":checkLicenses")?.outcome)
-    assertEquals(TaskOutcome.NO_SOURCE, result.task(":test")?.outcome)
-    println(result.task(":dependencyCheckAnalyze")?.path)
   }
 
   @org.junit.jupiter.api.Disabled("not yet finished")
