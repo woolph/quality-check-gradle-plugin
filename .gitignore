@@ -1,6 +1,7 @@
 /.gradle/
 build/
 secrets/
+/.kotlin/
 
 ### STS ###
 .apt_generated

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased/Upcoming
 
+## [3.2.0]
+
+### Changed
+- updated org.owasp.dependencycheck to 13.0.0
+- migrated from com.github.jk1.gradle-license-report:3.1.2 to com.github.jk1.dependency-license-report:3.1.4
+
 ## [3.1.1]
 
 ### Fixed

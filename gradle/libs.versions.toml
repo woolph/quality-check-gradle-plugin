@@ -1,14 +1,13 @@
 [versions]
 jvmTarget = "17"
 junit = "6.1.0"
-owaspDepdencyCheck = "12.2.2"
-licenseReport = "3.1.2"
+owaspDepdencyCheck = "13.0.0"
+licenseReport = "3.1.4"
 
 [libraries]
 dependencyCheck = { module = "org.owasp:dependency-check-gradle", version.ref = "owaspDepdencyCheck" }
-licenseReport = { module = "com.github.jk1:gradle-license-report", version.ref = "licenseReport" }
+licenseReport = { module = "com.github.jk1.dependency-license-report:com.github.jk1.dependency-license-report.gradle.plugin", version.ref = "licenseReport" }
 kotlinxDatetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.8.0"
-kotlinxSerialization-core = "org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0"
 kotlinxSerialization-json = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0"
 
 databaseDrivers-postgres = "org.postgresql:postgresql:42.7.11"

@@ -9,7 +9,6 @@ import io.github.woolph.gradle.util.children
 import io.github.woolph.gradle.util.get
 import io.github.woolph.gradle.util.processXml
 import java.time.LocalDate
-import kotlin.sequences.forEach
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.result.ComponentSelectionCause
